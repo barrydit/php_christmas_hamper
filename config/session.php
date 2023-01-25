@@ -135,6 +135,9 @@ else if (time() - $_SESSION['created'] > 1800) {
 // die(var_dump($_SESSION));
 
 // session_gc();
+if (!is_dir(SESSION_SAVE_PATH))
+  mkdir(SESSION_SAVE_PATH);
+
 if (!is_file(SESSION_SAVE_PATH . '/sessions.json')) touch(SESSION_SAVE_PATH . '/sessions.json');
 $json = file_get_contents(SESSION_SAVE_PATH . '/sessions.json', true);
 $json_decode = json_decode($json, true);
@@ -168,11 +171,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
           if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
             exit(header('Location: ' . APP_BASE_URL));
           else
-            require '../src/session_login.php';
+            require 'src/session_login.php';
         break;
         case 'logout':
           if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
-            require '../src/session_logout.php';
+            require 'src/session_logout.php';
           else
             exit(header('Location: ' . APP_BASE_URL));
         break;
@@ -192,5 +195,3 @@ switch ($_SERVER['REQUEST_METHOD']) {
     }
     break;
 }
-
-
