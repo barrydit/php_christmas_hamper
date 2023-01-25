@@ -1,0 +1,7 @@
+RedirectMatch 403 ^/config/?$
+RedirectMatch 403 ^/database/?$
+RedirectMatch 403 ^/export/?$
+RedirectMatch 403 ^/config/?$
+RedirectMatch 403 ^/src/?$
+RedirectMatch 403 ^/vendor/?$
+ErrorDocument 403 default

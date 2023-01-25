@@ -1,0 +1,30 @@
+{
+    "name": "barryd/christmas_hamper",
+    "description": "A Christmas Hamper solution for people who wish to use a database web-app, to store their hampers / clients.",
+    "type": "project",
+    "homepage": "https://github.com/barrydit/christmas_hamper",
+    "license": "WTFPL",
+    "authors": [
+        {
+            "name": "Barry Dick",
+            "email": "barryd.it@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {}
+    },
+    "require": {
+        "php": "^7.4",
+        "phpoffice/phpspreadsheet": "^1.22.0",
+        "vlucas/phpdotenv": "5.5.x-dev"
+    },
+    "config": {
+      "platform": {
+        "php": "7.4.0"
+      },
+      "optimize-autoloader": true,
+      "preferred-install": "dist",
+      "platform-check": false
+    },
+    "minimum-stability": "dev"
+}

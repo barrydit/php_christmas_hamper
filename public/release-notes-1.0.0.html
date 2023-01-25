@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Christmas Hamper -- Release Notes (v1.0.0)</title>
+
+    <link rel="shortcut icon" href="favicon.ico" />
+
+    <!-- BOOTSTRAP STYLES-->
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap/bootstrap.min.css" />
+    
+    <link rel="stylesheet" type="text/css" href="assets/css/styles.css" />
+
+<style>
+body {
+  background-color: #E4F2E0;
+}
+
+a {
+  color: #0066CC;
+  text-decoration: none;
+}
+
+div {
+  /* background-color: #FFF; */
+}
+</style>
+
+</head>
+<body>
+    <div class="container">
+      <div class="card card-primary">
+        <div class="card-header">
+          <div style="float: left; padding-top: 5px;"><a href="./" style="text-decoration: none;"><img src="assets/images/favicon.png" width="32" height="32" /> Christmas Hamper - Release Notes (v1.0.0)</a></div>
+          <div style="float: right;">
+            <a class="btn btn-primary" href="./?session=login" style="">Login</a>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+        <div class="card-body" style="background-color: rgba(0,0,0,.03);">
+          <div class="row">
+            <div class="overflowAuto">
+              <div class="card-header" style="background-color: #6FA7D7; color: #000;">
+Main Index (Home / Search)</div>
+              <ul class="card-footer" style="background-color: #C6DCEF; font-size: 14px; text-align: justify;">
+                <span style="font-weight: bolder;">Task</span>: Create a front page to access the application in steps. The front page consists of links to other parts including client listing and their corrsponding hampers. You can view and visit the top 5 previously (recently) modified clients and hampers. It also includes the client search toolbar.<br /> (Phone search is not enabled.)<br /><br />
+                <span style="font-weight: bolder;">Status</span>: Done.
+              </ul>
+              <div class="card-header" style="background-color: #6FA7D7; color: #000;">
+Reports</div>
+              <ul class="card-footer" style="background-color: #C6DCEF; font-size: 14px; text-align: justify;">
+                <span style="font-weight: bolder;">Task</span>: Create a separate page where by the hampers could be shown, but also allow for multiple filter criterias to be performed, as well as export the list into a single worksheet (XLS), using the shown column names. It also has a separate page where it can show numeric statistics such as Groups and PU/Delivery, as well as children age/gender stats.<br /><br />
+                <span style="font-weight: bolder;">Status</span>: Done.
+              </ul>
+              <div class="card-header" style="background-color: #6FA7D7; color: #000;">
+Clients</div>
+              <ul class="card-footer" style="background-color: #C6DCEF; font-size: 14px; text-align: justify;">
+                <span style="font-weight: bolder;">Task</span>: Create a page where existing clients can be searched, listed, and modified. Priority Listing is enabled with clients, so new hampers that are made for the CURR_YEAR, will show up on the list sooner (on top). This will be obvious as they will be displaying hamper numbers. It can also be exported to a worksheet (XLS), this particular export h/e will include all the column fields in the db->table. This is the best client backup feature so far.<br /><br />
+                <span style="font-weight: bolder;">Task</span>: Create a page where by an existing, or a new entry form, can allow for modifiable values and through the process of updating, create (by option) a new hamper for that CURR_YEAR. If the hamper however already exists, and is recent, then no new hamper will occure. However, if any updates are made to the clients, the information is there for also applied to the associatve hamper.<br /> Attention: <b>If a client is deleted from the application, then their associative hampers will also be deleted. Hampers need a client, and a client needs hampers.</b><br /><br />
+                <span style="font-weight: bolder;">Status </span>: Done<br />
+                <span style="font-weight: bolder;">Feature </span>: Calculate childrens ages automatically.
+              </ul>
+              <div class="card-header" style="background-color: #6FA7D7; color: #000;">
+Hampers</div>
+              <ul class="card-footer" style="background-color: #C6DCEF; font-size: 14px; text-align: justify;">
+                <span style="font-weight: bolder;">Task</span>: Create a page where hampers can be displayed, based on filter criteria either of Groups or Year. When this page is exported, it is split into 4 groups inside worksheets (XLS). However, if a particular group is choosen, it will only create a single worksheet (XLS)<br /><br />
+                <span style="font-weight: bolder;">Task</span>: Create a page where hampers are stored/updated, however client information (part of the hamper) is updated on the previous page.<br /><br />
+                <span style="font-weight: bolder;">Status </span>: Done<br />
+                <span style="font-weight: bolder;">Feature </span>: Create printable labels for the hampers.
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/jquery/jquery.min.js"></script>
+    
+    <script src="assets/js/bootstrap/bootstrap.min.js"></script>
+ 
+    <script>  
+var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
+
+//Get the distance from the top and add 30px for the padding
+var maxHeight = overflowAuto.getBoundingClientRect().top + 30;
+
+overflowAuto.style.height = "calc(100vh - " + maxHeight + "px)"; 
+    </script>
+  
+</body>
+</html>

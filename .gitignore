@@ -1,0 +1,6 @@
+export/
+database/
+session/
+vendor/
+.env.development
+error_log

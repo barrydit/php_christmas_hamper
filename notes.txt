@@ -1,0 +1,16 @@
+(BUG)  Add login support for database and raw php $_POST ... there is a bug that if there is no rows, there is no login.
+
+
+------------------------------------------------------
+Drop Down page fopr settings
+
+   * Add change passsword.
+
+   $setting['str_pad_hamper_no'] = 3; $
+   
+   * Add additional users.
+   
+     -- Remove user
+
+-- Auto add missing database
+-- Auto fill users table with darrell

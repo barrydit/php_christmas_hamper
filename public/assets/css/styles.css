@@ -1,0 +1,107 @@
+@charset "UTF-8"; /* CSS Document */
+
+html, body {
+  height: 100vh;
+  margin: 0px;
+  font-family: 'Open Sans', sans-serif;
+  overflow: hidden;
+}
+
+body {
+  background-color: #d9e7f4;
+}
+
+
+table, td {
+  margin: 0px auto;
+  border: 1px solid black; 
+}
+
+td {
+  padding: 5px;	
+}
+
+input[type="text"]:focus, 
+input[type="password"]:focus{
+    border:2px solid #50C878;
+}
+
+.container {
+  max-width: 730px;
+}
+
+.row {
+  --bs-gutter-x: 0;
+  --bs-gutter-y: 0;
+  margin: 0px;
+  padding: 0px;
+}
+
+.card {
+  height: calc(100vh - 25px);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+  /* background-color: #fff; */
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.card-primary {
+  border-color: #428bca;
+}
+
+.card-header {
+  /* background-color: #428bca; */
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  /* color: #fff; */
+  padding: 10px 15px;
+}
+
+.card-body {
+  height: -webkit-calc(100vh - 70px);
+  height: -moz-calc(100vh - 70px);
+  height: calc(100vh - 70px);
+  margin: 0px;
+  padding: 10px;
+}
+
+.overflowAuto {
+  overflow-x: hidden;
+  overflow-y: auto;
+/*   height: calc(100vh - 163px); */
+}
+
+.log-form {
+    position: absolute;
+	top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+	border: 1px solid #000;
+    background-color: #f3f3f3;
+    width: 360px;
+}
+
+#form-login #form-register {
+    padding: 5px 10px;
+}
+
+#form-logout {
+    margin: 0px;
+    padding: 0 10px;
+    line-height: 0px;
+}
+
+::-webkit-input-placeholder { /* Edge */
+  color: #FFF;
+}
+
+input::placeholder {
+  color: #1c87c9;
+  font-size: 1.2em;
+  font-style: italic;
+}
+
