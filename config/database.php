@@ -101,7 +101,7 @@ foreach(DB_TABLES as $key => $table) {
         }
       }
       mkdir(DB_BACK_PATH, 0700, true);
-
+      file_put_contents(APP_BASE_PATH . '.env.development', "DB_UNAME=root\nDB_PWORD=");
     } else {
 
       $command = 'mysql'
