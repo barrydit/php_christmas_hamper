@@ -6,7 +6,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 */
-$json = file_get_contents('../session/sessions.json', true);
+$json = file_get_contents('session/sessions.json', true);
 $json_decode = json_decode($json, true);
 
 $visitor_count = 0;
