@@ -82,7 +82,7 @@ foreach(DB_TABLES as $key => $table) {
         preg_match("/^Table\s['](\w+).(\w+)[']\sdoesn't\sexist$/", $pdo->errorInfo()[2], $matches);
         if ($matches[2] == 'users') {
           $pdo->query('CREATE TABLE `users` ( `id` int(11) NOT NULL, `name` varchar(255) NOT NULL, `username` varchar(25) NOT NULL, `password` varchar(255) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
-          $pdo->query('INSERT INTO `users` (`id`, `name`, `username`, `password`) VALUES (1, \'Owner\', \'darrell\', \'$2y$12$Cz/AlKIOBS7aAJ8Qoy2AFOua4A9VLzHLyX0vaweWc7SP3JA/MwU2C\');');
+          $pdo->query('INSERT INTO `users` (`id`, `name`, `username`, `password`) VALUES (1, \'Owner\', \'root\', \'$2y$12$Cz/AlKIOBS7aAJ8Qoy2AFOua4A9VLzHLyX0vaweWc7SP3JA/MwU2C\');');
           $pdo->query('ALTER TABLE `users` ADD PRIMARY KEY (`id`);');
           $pdo->query('ALTER TABLE `users` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;');
           continue;
