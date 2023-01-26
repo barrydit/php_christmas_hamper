@@ -8,7 +8,7 @@ require(APP_BASE_PATH . 'config/config.php');
 // https://stackoverflow.com/questions/38396046/how-to-run-composer-update-on-php-server
 
 define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
-define('COMPOSER_INITED', file_exists(APP_BASE_PATH.'/vendor'));
+define('COMPOSER_INITED', file_exists(APP_BASE_PATH . 'vendor'));
 
 set_time_limit(100);
 ini_set('memory_limit',-1);
