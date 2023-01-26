@@ -14,35 +14,31 @@ require_once 'functions.php';
 if (!isset($_SERVER['REQUEST_URI']))  {
   $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'],0 );
 
-  if (isset($_SERVER['QUERY_STRING']) AND $_SERVER['QUERY_STRING'] != "") {
+  if (isset($_SERVER['QUERY_STRING']) AND $_SERVER['QUERY_STRING'] != "")
     $_SERVER['REQUEST_URI'] .= '?'.$_SERVER['QUERY_STRING'];
-  }
 }
 
-error_reporting(E_STRICT | E_ALL);
-
 date_default_timezone_set('America/Vancouver');
-
-//ini_set("include_path", "src"); 
 
 define('APP_NAME',      'Christmas Hamper ' . date('Y'));
 define('APP_VERSION',   number_format(1.0, 1) . '.0');
 //define( 'APP_PHP_VERSION', PHP_VERSION ); // intval(PHP_VERSION)>4
+define('APP_ENV',       ($_SERVER['SERVER_NAME'] == 'localhost' ? 'development' : 'production')); // development
 define('APP_TIMEOUT',   strtotime('1970-01-01 23:59:59' . 'GMT')); // 86400
 define('APP_UNAME',     'root');
 define('APP_PWORD',     'password');
 define('APP_DOMAIN',    isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
 define('APP_PATH',      dirname(__DIR__, 1));
 define('APP_DB',        '/database/');
-define('APP_SRC',       '/src/');
-define('APP_TMP',       '/var/tmp/');
 define('APP_EXPORT',    '/export/');
+define('APP_SRC',       '/src/');
+define('APP_SESSION',   '/session/');
+define('APP_TMP',       '/var/tmp/');
 
+//ini_set("include_path", "src");
 ini_set('log_errors', 1);
 ini_set('error_log', APP_PATH . '/error_log'); // APP_BASE_PATH . "../tmp/error_log"
-
-defined('APP_HTTPS') or
-  define('APP_HTTPS', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? true : false);
+error_reporting(E_STRICT | E_ALL);
 
 /* DocumentRoot / basePath */
 
@@ -53,19 +49,24 @@ define('APP_BASE_URI', // https://stackoverflow.com/questions/8037266/get-the-ur
   substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) // https://stackoverflow.com/questions/7921065/manipulate-url-serverrequest-uri
 );
 
+defined('APP_HTTPS') or
+  define('APP_HTTPS', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? true : false);
+  
 define('APP_BASE_URL',   // BASEURL
   preg_replace('!([^:])(//)!', "$1/",
     str_replace('\\', '/', (
-      isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ?
-        'http'.(empty($_SERVER['HTTPS'])?'':'s').'://'.APP_DOMAIN.APP_BASE_URI : // dirname($_SERVER['PHP_SELF']) 
+      APP_HTTPS ?
+        'http'.(APP_HTTPS ?'s':'').'://'.APP_DOMAIN.APP_BASE_URI : // dirname($_SERVER['PHP_SELF']) 
         'http://'.APP_DOMAIN.APP_BASE_URI // dirname($_SERVER['REQUEST_URI'])
+      )
     )
   )
 );
+
 // Only works if the Query exists --> parse_str(parse_url($_SERVER['REQUEST_URI'])['query'], $query);
 define('APP_QUERY',     $_GET); // array( key($_GET) => current($_GET) )); // ? . key($_REQUEST) . '=' . current($_REQUEST)
 define('APP_ROOT',      getRelativePath(substr(APP_BASE_URI, 0, strrpos(APP_BASE_URI, APP_SRC) + 1), APP_BASE_URI)); // $_SERVER['PHP_SELF']
-define('APP_SELF',      APP_PATH . 'public'. DIRECTORY_SEPARATOR . basename($_SERVER["SCRIPT_NAME"])); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
+define('APP_SELF',      APP_PATH . DIRECTORY_SEPARATOR . 'public'. DIRECTORY_SEPARATOR . basename($_SERVER["SCRIPT_NAME"])); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
 
 define('READ_LEN', 4096);
 
@@ -86,4 +87,3 @@ function shutdown()
 }
 register_shutdown_function('shutdown');
 */
-
