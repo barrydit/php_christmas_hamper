@@ -21,9 +21,12 @@ if (!getenv('HOME') && !getenv('COMPOSER_HOME')) {
 chdir('../');
 
 ini_set('phar.readonly',0);
-if (!file_exists('composer'))
+if (!file_exists('composer')) {
+  if (!is_file(APP_BASE_PATH . 'composer.phar'))
+    file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
   (new Phar("composer.phar"))->extractTo("./composer");
-    
+}
+
 //This requires the phar to have been extracted successfully.
 require_once ('composer/vendor/autoload.php');
 
@@ -36,8 +39,7 @@ defined('COMPOSER_AUTOLOAD_PATH')
   or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
 
 if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
-  if (!is_file(APP_BASE_PATH . 'composer.phar'))
-    file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
+
   //chdir();
   //shell_exec("cd ../ && php -f composer.phar", $output, $worked); // --dry-run --no-interaction --ansi
   // config --global --auth github-oauth.github.com ghp_1XhQL4hgdghjjyuuyyuTfux51ZDHZz
