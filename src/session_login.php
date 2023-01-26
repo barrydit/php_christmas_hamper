@@ -16,7 +16,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $row_login = $stmt->fetch();
       break;
     }
-
+//die(var_dump($_POST));
     if (isset($_POST['register'])) {
 /*
       $stmt = $pdo->prepare("INSERT INTO `users` (`name`, `username`, `password`) VALUES (?, ?, ?);");
@@ -45,7 +45,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
       $token = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
 
-      if (!$token || $token !== $_SESSION['token']) $login_error = 'This site currently does not support non-ssl login. <a href="" title="' . $_SESSION['token'] . '">$_SESSION["token"]</a> != ' . $token;
+      if (!$token || $token !== $_SESSION['token']) $login_error = 'This site currently does not support non-ssl login. <a href="" title="' . $_SESSION['token'] . '">' . $_SESSION["token"] . '</a> != ' . $token;
 
       //die($token . ' !== ' . $_SESSION['token']);
       //if (!$token || $token !== $_SESSION['token'])
@@ -53,18 +53,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
   
     // https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 
-        
-    
     //die('Working hard at debugging the program ... please stand by... ');
-    
+
       try {
-        $result = $pdo->query('SELECT 1 FROM ' . DB_TABLES[2] . ' LIMIT 1;');
-      } catch (Exception $e) {
+        $result = $pdo->query('SELECT 1 FROM ' . DB_TABLES[0] . ' LIMIT 1;');
+      } catch (Exception $e) {      
+
       // We got an exception == table not found
         if ($_POST['username'] == APP_UNAME && $_POST['password'] == APP_PWORD) {
           $_SESSION['user_id'] = (int) 0;
 
-          $_SESSION['enable_ssl'] = (!empty($_POST['enable_ssl']) && $_POST['enable_ssl'] == 'on') ? TRUE : FALSE;
+          $_SESSION['enable_ssl'] = (APP_HTTPS ? TRUE : FALSE);
           (!$_SESSION['enable_ssl']) ?: exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_BASE_URI)); // APP_BASE_URL
         }
 
@@ -81,6 +80,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 */
       }
 
+
       $stmt = $pdo->prepare("SELECT `id`, `username`, `password` FROM `users` WHERE `username` = :username;");
       $stmt->execute(array(
         ":username" => $_POST['username']
@@ -92,10 +92,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
         if (password_verify($_POST['password'], $row_login['password'])) {
         
           $_SESSION['user_id'] = (int) $row_login['id'];
-          $_SESSION['enable_ssl'] = (!empty($_REQUEST['enable_ssl']) && $_REQUEST['enable_ssl'] == 'on') ? TRUE : FALSE;
-          (!$_SESSION['enable_ssl']) ?: exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_BASE_URI)); // APP_BASE_URL
+          $_SESSION['enable_ssl'] = (APP_HTTPS ? TRUE : FALSE);
+          (!$_SESSION['enable_ssl']) ? exit(header('Location: ' . 'http://'.APP_DOMAIN.APP_BASE_URI)) : exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_BASE_URI)); // APP_BASE_URL
         } else
           $login_error = 'Username / Password did not match.';
+
+     //die(var_dump($_POST));
 
     }
     break;
@@ -155,7 +157,7 @@ td {
           <tr>
             <td><small><a class="forgot" href="#" title="Feature does not work.">Forgot Password?</a></small></td>
             <td style="text-align: center">
-              <input type="checkbox" id="enable_ssl" name="enable_ssl" checked />
+              <input type="checkbox" id="enable_ssl" name="enable_ssl" <?=(APP_HTTPS ? 'checked': '')?> />
               <small><label for="enable_ssl"> Enable SSL?</label></small>
             </td>
             <td style="text-align: left;">
