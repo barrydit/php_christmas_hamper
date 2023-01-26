@@ -56,7 +56,7 @@ define('APP_BASE_URL',   // BASEURL
   preg_replace('!([^:])(//)!', "$1/",
     str_replace('\\', '/', (
       APP_HTTPS ?
-        'http'.(APP_HTTPS ?'s':'').'://'.APP_DOMAIN.APP_BASE_URI : // dirname($_SERVER['PHP_SELF']) 
+        'https://'.APP_DOMAIN.APP_BASE_URI : // dirname($_SERVER['PHP_SELF']) 
         'http://'.APP_DOMAIN.APP_BASE_URI // dirname($_SERVER['REQUEST_URI'])
       )
     )
