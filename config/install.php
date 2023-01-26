@@ -219,23 +219,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 $files = array(/*0 => array('path', 'filesize')*/ );
 
-foreach (glob("*.php") as $filename) {
+foreach (glob("config/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
     $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
 }
-foreach (glob("../*.php") as $filename) {
+foreach (glob("database/*.sql") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
     $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
 }
-foreach (glob("../config/*.php") as $filename) {
+foreach (glob("public/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
     $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
 }
-foreach (glob("../database/*.sql") as $filename) {
-    //echo "$filename size " . filesize($filename) . "\n";
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
-}
-foreach (glob("../src/*.php") as $filename) {
+foreach (glob("src/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
     $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
 }
@@ -362,8 +358,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
               <div style="height: 10px;"></div>
               <div style="height: 10px; float: right;">
               <form style="float: right; margin-right: 10px;" action="<?=APP_BASE_URI . '?' . 'db=' . DB_NAME[0]?>" autocomplete="off" method="POST">
-                <?=(strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
-                <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""')?>>Backup</button>
+                <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup First!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
+                <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>Backup</button>
               </form>
               </div>
               <div>Please use this feature at your very OWN discretion...</div><br />
@@ -377,7 +373,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 </fieldset>
               </li>
               <li>
-                <fieldset id="group2" <?=(strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : 'disabled=""')?>>
+                <fieldset id="group2" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>
                 Or are you trying to recover from a backup? <input type="radio" id="q2_n" name="q2_recover" value="no" onclick="handleClick(this);" />
                 <label for="q2_n">No</label>
                 <input type="radio" id="q2_y" name="q2_recover" value="yes" onclick="handleClick(this);" />
