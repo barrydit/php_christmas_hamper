@@ -93,12 +93,16 @@ switch($_SERVER['SERVER_NAME']) {
       //exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_BASE_URL ))); // basename($_SERVER['REQUEST_URI']));
     endif;
     if ($_SERVER['SERVER_NAME'] == 'localhost') {
-      if (!is_file(APP_BASE_PATH . '.env.development'))
-        file_put_contents(APP_BASE_PATH . '.env.development', "DB_UNAME=root\nDB_PWORD=");
-      $dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.development');
-    } else
-      $dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.production');
-    $dotenv->safeLoad();
+      if (!is_file(APP_BASE_PATH . '.env.' . APP_ENV))
+        file_put_contents(APP_BASE_PATH . '.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=");
+    }
+    if(class_exists('Dotenv')) {
+      $dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.' . APP_ENV);
+      $dotenv->safeLoad();
+    } else {
+      $_ENV['DB_UNAME'] = 'root';
+      $_ENV['DB_PWORD'] = '';
+    }
     break;
     
   default:
@@ -110,8 +114,7 @@ switch($_SERVER['SERVER_NAME']) {
 
 $includeFiles = [
   APP_BASE_PATH . '/config/database.php',
-  APP_BASE_PATH . '/config/session.php',
-
+  APP_BASE_PATH . '/config/session.php'
 ];
 
 foreach($includeFiles as $includeFile) {
@@ -373,5 +376,3 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 */
-
-?>
