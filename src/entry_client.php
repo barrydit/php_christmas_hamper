@@ -53,7 +53,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 SELECT a.id + 1 AS start, MIN(b.id) - 1 AS end
 FROM `clients` AS a, `clients` AS b
 WHERE a.id < b.id AND a.id >= 1 AND b.id <= (SELECT id FROM `clients` ORDER BY id DESC LIMIT 1)
-GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;");
+GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;
 QUERY);
       $stmt->execute(array());
       $row_recycle = $stmt->fetch();
@@ -260,7 +260,7 @@ QUERY);
 SELECT a.id + 1 AS start, MIN(b.id) - 1 AS end
 FROM `hampers` AS a, `hampers` AS b
 WHERE a.id < b.id AND a.id >= 1 AND b.id <= (SELECT id FROM `hampers` ORDER BY id DESC LIMIT 1)
-GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;");
+GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;
 QUERY);
         $stmt->execute(array());
         $row_recycle = $stmt->fetch();
