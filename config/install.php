@@ -358,7 +358,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
               <div style="height: 10px;"></div>
               <div style="height: 10px; float: right;">
               <form style="float: right; margin-right: 10px;" action="<?=APP_BASE_URI . '?' . 'db=' . DB_NAME[0]?>" autocomplete="off" method="POST">
-                <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup First!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
+                <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
                 <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>Backup</button>
               </form>
               </div>
