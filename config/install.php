@@ -497,7 +497,7 @@ if (!empty($FoundFiles)) {
   $FoundFiles = array_values($FoundFiles);
   foreach ($FoundFiles as $key => $file) {
     preg_match('/^.+\((.+)\)\.\w+$/', $file, $matches);
-    if ($matches[1] != date('Y')) touch('../database/backup/' . $file, strtotime($matches[1] . '-12-31'), strtotime($matches[1] . '-12-31'));
+    if ($matches[1] != date('Y')) @touch('../database/backup/' . $file, strtotime($matches[1] . '-12-31'), strtotime($matches[1] . '-12-31'));
       //exec('touch -d "' . '31 December ' . $matches[1] . '" "../database/backup/' . $file . '"',$output,$worked); // $matches[1] . '-12-31"
     echo '  <tr>' . "\n"
     . '                      <td style="text-align: center;"><input type="radio" name="restore" value="' . $file . '" ' . ($key == 0 ? 'checked' : '') . '></td>' . "\n"
