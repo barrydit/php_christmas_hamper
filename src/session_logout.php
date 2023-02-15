@@ -21,14 +21,14 @@ session_write_close();
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="Refresh" content="5; url='<?=APP_BASE_URI?>'" /> 
+    <meta http-equiv="Refresh" content="5; url='<?=APP_URL_PATH?>'" /> 
     <title>Dr. David Raymant - <?=APP_NAME?> -- Logout</title>
 
-    <base href="<?=APP_BASE_URL?>" />
+    <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-    <link rel="shortcut icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
+    <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
 
-    <link rel="stylesheet" type="text/css" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
     <script type="text/javascript">
 <!--
@@ -51,7 +51,7 @@ session_write_close();
 <?php } ?>
         <div id="form-logout">
           <p style="text-align: right; font-size:14px;">
-            <a href="<?=APP_BASE_URL ?>">Click here to Log In.</a><img src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/giphy.gif" alt="Loading..." width="25" height="25"/>
+            <a href=".">Click here to Log In.</a><img src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/giphy.gif" alt="Loading..." width="25" height="25"/>
           </p>
         </div>
         <div style="border-top: 1px dotted black; margin: 5px; line-height: 0px;">
@@ -60,7 +60,7 @@ session_write_close();
       </div><!--end log-form -->
     </div>
     <!-- JQUERY SCRIPTS -->
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
   </body>
 </html>

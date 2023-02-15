@@ -23,12 +23,12 @@ foreach($json_decode as $key => $file) {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Search</title>
 
-  <base href="<?=APP_BASE_URL?>" />
+  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.png" />
+  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" />
   
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -104,10 +104,10 @@ if (!extension_loaded('gd')) { ?>
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /></a> Home | <a href="?reports">Reports</a> | Search &#11106; <a href="?search=clients" style="text-decoration: none;">Clients</a> : <a href="?search=hampers" style="text-decoration: none;">Hampers</a>
-        <form style="float: right;" action="<?=APP_BASE_URI . '?'?>" autocomplete="off" method="GET">
+        <form style="float: right;" action="<?=APP_URL_PATH . '?'?>" autocomplete="off" method="GET">
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
-        <form style="float: right; margin-right: 10px;" action="<?=APP_BASE_URI . '?'?>" autocomplete="off" method="GET">
+        <form style="float: right; margin-right: 10px;" action="<?='?'?>" autocomplete="off" method="GET">
           <button type="submit" name="db" value="<?= DB_NAME[0]; ?>" style="float: right; width: 7em;">Database</button>
         </form>
       </h3>
@@ -116,7 +116,7 @@ if (!extension_loaded('gd')) { ?>
   
  
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form id="full_name_frm" method="POST" action="<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" method="POST" action="<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -294,11 +294,11 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </table>
   </div>
   
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
     
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
   
 <script>
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
@@ -314,7 +314,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

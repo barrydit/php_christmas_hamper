@@ -72,12 +72,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Hamper Entry</title>
 
-  <base href="<?=APP_BASE_URL?>" />
+  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -257,9 +257,9 @@ td {
       </form>
     </div>
   </div>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
 
 <script>
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

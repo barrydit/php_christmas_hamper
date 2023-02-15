@@ -149,12 +149,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Reports</title>
 
-  <base href="<?=APP_BASE_URL?>" />
+  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -218,7 +218,7 @@ td {
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <div style="float: right;">
-        <form action="<?=APP_BASE_URI . '?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+        <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </div>
@@ -245,7 +245,7 @@ $group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
   <div style="position: relative; padding-top: 10px; width: 700px; margin: auto; background-color: #EEE0F2;">
     <div style="position: absolute; margin-top: -10px; margin-left: -1px; width: 702px; ">
       <div class="head" style="position: relative; height: 24px; display: none;">
-        <form style="float: right;" action="<?=APP_BASE_URI . '?' . http_build_query((array) ['reports' => (empty($report) ? '' : $report), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
+        <form style="float: right;" action="<?='?' . http_build_query((array) ['reports' => (empty($report) ? '' : $report), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
           <button>Download</button>
         </form>
       </div>
@@ -259,7 +259,7 @@ $group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
     <div style="margin: 0px auto; padding: 15px 0px 20px 0px; width: 98%;">
 
-      <form style="display: inline; padding-left: 15px;" action="<?=APP_BASE_URI . '?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="GET">
+      <form style="display: inline; padding-left: 15px;" action="<?='?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="GET">
         <input type="hidden" name="reports" value="" />
         <input type="hidden" name="date" value="<?=(empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])?>" />
 <?php if (!empty($_GET['transport_method'])) { ?>
@@ -274,7 +274,7 @@ $group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
         <caption style="font-weight: bolder;"><input type="checkbox" checked="" disabled="" />Hampers: (<?=count($rows)?>)</caption>
       </form>
 
-      <form style="float: right; margin-right: 10px;" action="<?=APP_BASE_URI . '?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="POST">
+      <form style="float: right; margin-right: 10px;" action="<?='?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="POST">
       <div style="display: inline; margin-right: 10px;">
         <label for="transport_method">PU/D:</label>
 <?php
@@ -293,7 +293,7 @@ $_GET = ['reports' => $report];
 (!empty($group_size) ? $_GET = $_GET + (array) ['group_size' => $group_size] : '');
 $_GET = $_GET + (array) ['transport_method' => ''];
 ?>
-        <select id="transport_method" onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')
+        <select id="transport_method" onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')
 ?>' + this.value).replace(/&amp;/g, '&');">
           <option value="" selected></option>
           <option value="PICK-UP" <?=(!empty($transport_method) && $transport_method == 'PICK-UP' ? 'selected="selected"' : '' )?>>Pick-up</option>
@@ -321,7 +321,7 @@ $_GET = ['reports' => $report];
 $_GET = $_GET + (array) ['group_size' => ''];
 ?>
 
-        <select name="group_size" onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
+        <select name="group_size" onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
           <option value=""></option>
           <option value="single" <?=(!empty($group_size) && $group_size == 'single' ? 'selected="selected"' : '' )?>>Single</option>
           <option value="couple" <?=(!empty($group_size) && $group_size == 'couple' ? 'selected="selected"' : '' )?>>Couple</option>
@@ -337,7 +337,7 @@ $_GET = $_GET + (array) ['date' => ''];
 ?>
       <div style="display: inline; margin-right: 10px;">
         <label for="">Hamper Year</label>
-          <select onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
+          <select onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
 <?php
   $stmt = $pdo->prepare('SELECT DISTINCT YEAR(`created_date`) FROM `hampers` ORDER BY `created_date` DESC;');
   $stmt->execute(array());
@@ -594,9 +594,9 @@ $_GET = $_GET + (array) ['date' => ''];
 
   </div>
   
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
     
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

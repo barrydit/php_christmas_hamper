@@ -120,8 +120,7 @@ $includeFiles = [
 foreach($includeFiles as $includeFile) {
   if (!file_exists($includeFile)) {
     echo "Failed to load a necessary file: " . $includeFile . PHP_EOL;
-    exit(1);
-    break;
+    exit(1); //break;
   }
   require $includeFile;
 }
@@ -303,7 +302,7 @@ HERE);
       elseif (current($_GET) == 'hampers')
         require APP_PATH . '/src/search_hamper.php';
       else
-        exit(header('Location: ' . APP_BASE_URL));
+        exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'client')
       if (current($_GET) == 'entry' || empty(current($_GET)))
         require APP_PATH . '/src/entry_client.php';
@@ -314,14 +313,14 @@ HERE);
       elseif ((int) current($_GET))
         require APP_PATH . '/src/entry_client.php';
       else
-        exit(header('Location: ' . APP_BASE_URL));
+        exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'hamper')
       if (current($_GET) == 'entry' || empty(current($_GET)))
         require APP_PATH . '/src/entry_hamper.php';
       elseif ((int) current($_GET))
         require APP_PATH . '/src/entry_hamper.php';
       else
-        exit(header('Location: ' . APP_BASE_URL));
+        exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'reports') {
       if (current($_GET) == '' || !empty(current($_GET))) {
         require APP_PATH . '/src/reports.php';
@@ -353,13 +352,13 @@ HERE);
 /*    elseif (current($_GET) == 'archive')
         require APP_PATH . '/src/db_archive.php';   */
       else
-        exit(header('Location: ' . APP_BASE_URL . '?' . http_build_query(array(
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
           key($_GET) => 'patient'
         ))));
 
 
 /*
-      exit(header('Location: ' . APP_BASE_URL . '?' . http_build_query(array(
+      exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
         'search' => ''
       ))));
 */

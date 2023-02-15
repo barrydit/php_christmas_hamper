@@ -71,7 +71,7 @@ HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no AS
         $full_name = preg_split('/\s*,\s*/', $_POST['q']);
         
         $stmt = $pdo->prepare(<<<HERE
-SELECT `id` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ;
+SELECT `id` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name LIMIT 1;
 HERE);
         $stmt->execute(array(
           ":last_name" => (!empty($client_search[0]) ? $client_search[0] . '%' : $_POST['q'] . '%'),
@@ -81,10 +81,10 @@ HERE);
 
         //die(var_dump($client_search));        
         if (isset($row['id']))
-          exit(header('Location: ' . APP_BASE_URL . '?client=' . $row['id']));
+          exit(header('Location: ' . APP_URL_BASE . '?client=' . $row['id']));
         
         if (empty($_POST['q']))
-          exit(header('Location: ' . APP_BASE_URL . '?search=clients'));
+          exit(header('Location: ' . APP_URL_BASE . '?search=clients'));
         else {
           $stmt = $pdo->prepare(<<<HERE
 SELECT h1.`id`                                                  AS h_id,
@@ -418,12 +418,12 @@ HERE;
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Client Search</title>
 
-  <base href="<?=APP_BASE_URL?>" />
+  <base href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
 
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" /> 
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" /> 
 
 <style>
 html, body {
@@ -487,7 +487,7 @@ td {
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search">Search</a> &#11106; Clients : <a href="?search=hampers">Hampers</a>
-        <form action="<?=APP_BASE_URI . '?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+        <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </h3>
@@ -500,7 +500,7 @@ td {
   <div style="position: relative; padding-top: 10px; width: 700px; margin: auto; background-color: #E0EDF2;">
     <div style="position: absolute; margin-top: -10px; margin-left: -1px; width: 702px; ">
       <div class="head" style="position: relative; height: 24px; display: none;">
-        <form style="float: right;" action="<?=APP_BASE_URI . '?' . http_build_query($_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
+        <form style="float: right;" action="<?='?' . http_build_query($_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
           <button>Download</button>
         </form>
       </div>
@@ -511,7 +511,7 @@ td {
   </div>
  
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
-    <form id="full_name_frm" method="POST" action="<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -542,10 +542,10 @@ td {
       </colgroup>
       <thead>
         <tr>
-          <th><a href="<?= APP_BASE_URI . '?' . http_build_query(array_merge($_GET, ['sort_by' => 'name', 'order_by' => (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'ASC' : 'DESC')]) , '', '&amp;')?>" <?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' : 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' ) : 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"') ?>>Name <img id="name_asc_desc" src="<?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="' : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII="' ) : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="') ?> /></a></th>
+          <th><a href="<?='?' . http_build_query(array_merge($_GET, ['sort_by' => 'name', 'order_by' => (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'ASC' : 'DESC')]) , '', '&amp;')?>" <?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' : 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' ) : 'onmouseout="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'name_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"') ?>>Name <img id="name_asc_desc" src="<?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="' : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII="' ) : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="') ?> /></a></th>
           <th>Address</th>
           <th>Phone #</th>
-          <th style="white-space:nowrap"><a href="<?= APP_BASE_URI . '?' . http_build_query(array_merge($_GET, ['sort_by' => 'sort-hamper', 'order_by' => (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'ASC' : 'DESC')]) , '', '&amp;')?>" <?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' : 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' ) : 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"') ?>>Hamper <img id="sort_asc_desc" src="<?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'sort-hamper' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="' : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII="' ) : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="') ?> /></a></th>
+          <th style="white-space:nowrap"><a href="<?='?' . http_build_query(array_merge($_GET, ['sort_by' => 'sort-hamper', 'order_by' => (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'ASC' : 'DESC')]) , '', '&amp;')?>" <?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'name' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' : 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' ) : 'onmouseout="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII=\'"' . ' ' . 'onmouseover="document.getElementById(\'sort_asc_desc\').src = \'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII=\'"') ?>>Hamper <img id="sort_asc_desc" src="<?= (!empty($_GET['sort_by']) && $_GET['sort_by'] == 'sort-hamper' ? (!empty($_GET['order_by']) && $_GET['order_by'] == 'DESC' ? 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="' : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOLQUH/u/6v/n/6v+L/s/43/cNi4LtX3f93/9/J1DRnP/157EoWC2x6MuK/xv/z/xf9a1QEasbJkt0fp/yv+xbrhxOR1ZJFL7OlBuCIQkAjhQKp/5zB/AAAAAASUVORK5CYII="' ) : 'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAWUlEQVR4AWP4TwAOPQWbJVa/XiSHU8F6iWXfV/+f/K1TDquC1RKLvqz4v/H/zP9V3woVsSiY+3Xp//X/V/5f9L/tf+p5LAr6/rf8r/pf+D/zf9L/mG9DLCQB0wYJ0AeZ4ZQAAAAASUVORK5CYII="') ?> /></a></th>
         </tr>
       </thead>
       <tbody>
@@ -594,10 +594,10 @@ else {
     </table>
   </div>
 
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/bootstrap/bootstrap.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
  
 <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
@@ -614,7 +614,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_BASE_URL . '?' . http_build_query( array( key($_GET) => current($_GET) ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query( array( key($_GET) => current($_GET) ))?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist
@@ -636,8 +636,8 @@ function full_name_input() {
       // An item was selected from the list!
       // yourCallbackHere()
       //alert(opts[i].value);
-      full_name_form = document.getElementById ('full_name_frm');
-      full_name_form.submit();
+      full_name_form = document.getElementById('full_name_frm');
+      full_name_form.submit.click();
       break;
     }
   }

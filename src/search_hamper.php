@@ -344,12 +344,12 @@ HERE);
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Hamper Search</title>
 
-  <base href="<?=APP_BASE_URL?>" />
+  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -414,7 +414,7 @@ td {
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search">Search</a> &#11106;  <a href="?search=clients">Clients</a> : Hampers
-        <form action="<?=APP_BASE_URI . '?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+        <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </h3>
@@ -431,7 +431,7 @@ $group_size = (!empty($_GET['group_size']) ? $_GET['group_size'] : '');
   <div style="position: relative; padding-top: 10px; width: 700px; margin: auto; background-color: #EEE0F2;">
     <div style="position: absolute; margin-top: -10px; margin-left: -1px; width: 702px; ">
       <div class="head" style="position: relative; height: 24px; display: none;">
-        <form style="float: right;" action="<?=APP_BASE_URI . '?' . http_build_query((array) ['search' => (empty($search) ? '' : $search), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
+        <form style="float: right;" action="<?='?' . http_build_query((array) ['search' => (empty($search) ? '' : $search), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['export' => ''], '', '&amp;')?>" autocomplete="off" method="POST">
           <caption>Each group is found in separate WORKSHEETS.</caption> <button>Download</button>
         </form>
       </div>
@@ -442,7 +442,7 @@ $group_size = (!empty($_GET['group_size']) ? $_GET['group_size'] : '');
   </div>
 
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
-    <form method="POST" action="<?=APP_BASE_URI . '?' . http_build_query((array) ['search' => (empty($search) ? '' : $search), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['print' => 'labels'], '', '&amp;')?>" autocomplete="off">
+    <form method="POST" action="<?='?' . http_build_query((array) ['search' => (empty($search) ? '' : $search), 'date' => (empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])] + $_GET + ['print' => 'labels'], '', '&amp;')?>" autocomplete="off">
     <div style="display: table; margin: 15px auto; padding: 0px 10px; width: 97%;">
 
         <div style="display: table-cell; padding-left: 10px;">
@@ -469,7 +469,7 @@ $_GET = ['search' => $search];
 $_GET = $_GET + (array) ['transport_method' => ''];
 ?>
         <label for="transport_method">PU/D:</label>
-        <select id="transport_method" onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&amp;');">
+        <select id="transport_method" onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&amp;');">
           <option value="" selected=""></option>
           <option value="PICK-UP" <?=(!empty($transport_method) && $transport_method == 'PICK-UP' ? 'selected="selected"' : '' )?>>Pick-up</option>
           <option value="DELIVERY" <?=(!empty($transport_method) && $transport_method == 'DELIVERY' ? 'selected="selected"' : '' )?>>Delivery</option>
@@ -499,7 +499,7 @@ $_GET = ['search' => $search];
 (!empty($transport_method) ? $_GET = $_GET + (array) ['transport_method' => $transport_method] : '' );
 $_GET = $_GET + (array) ['group_size' => ''];
 ?>
-          <select name="group_size" onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
+          <select name="group_size" onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
             <option value=""></option>
             <option value="single" <?=(!empty($group_size) && $group_size == 'single' ? 'selected="selected"' : '' )?>>Single</option>
             <option value="couple" <?=(!empty($group_size) && $group_size == 'couple' ? 'selected="selected"' : '' )?>>Couple</option>
@@ -525,7 +525,7 @@ $_GET = (array) ['search' => $search];
 (!empty($group_size) ? $_GET = $_GET + (array) ['group_size' => $group_size] : '');
 $_GET = $_GET + (array) ['date' => ''];
 ?>
-          <select onchange="window.location.href=('<?=APP_BASE_URI . '?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
+          <select onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
             <option value=""></option>
 <?php
   $stmt = $pdo->prepare('SELECT DISTINCT YEAR(`created_date`) FROM `hampers` ORDER BY `created_date` DESC;');
@@ -595,9 +595,8 @@ if (!empty($rows)) {
     </table>
   </div>
   
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-    
-<script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

@@ -25,7 +25,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         (!empty($_REQUEST['username']) ? $_REQUEST['username'] : NULL),
         (!empty($_REQUEST['password']) ? password_hash($_REQUEST['password'], PASSWORD_DEFAULT) : NULL)
       ));
-      header('Location: ' . APP_BASE_URL);
+      header('Location: ' . APP_URL_BASE);
       exit();
       
 */
@@ -64,7 +64,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
           $_SESSION['user_id'] = (int) 0;
 
           $_SESSION['enable_ssl'] = (APP_HTTPS ? TRUE : FALSE);
-          (!$_SESSION['enable_ssl']) ?: exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_BASE_URI)); // APP_BASE_URL
+          (!$_SESSION['enable_ssl']) ?: exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_URL_PATH)); // APP_URL_PATH
         }
 
 /*
@@ -92,8 +92,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
         if (password_verify($_POST['password'], $row_login['password'])) {
         
           $_SESSION['user_id'] = (int) $row_login['id'];
-          $_SESSION['enable_ssl'] = (APP_HTTPS ? TRUE : FALSE);
-          (!$_SESSION['enable_ssl']) ? exit(header('Location: ' . 'http://'.APP_DOMAIN.APP_BASE_URI)) : exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_BASE_URI)); // APP_BASE_URL
+          $_SESSION['enable_ssl'] = (defined('APP_HTTPS') ? TRUE : FALSE);
+          (!$_SESSION['enable_ssl']) ? exit(header('Location: ' . 'http://'.APP_DOMAIN.APP_URL_PATH)) : exit(header('Location: ' . 'https://'.APP_DOMAIN.APP_URL_PATH)); // APP_URL_BASE
         } else
           $login_error = 'Username / Password did not match.';
 
@@ -119,11 +119,11 @@ die();
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><?=APP_NAME?> -- Login</title>
 
-    <base href="<?=APP_BASE_URL?>" />
+    <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
     
-    <link rel="shortcut icon" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/images/favicon.ico" />
+    <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
 
-    <link rel="stylesheet" type="text/css" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
     <style type="text/css">
 table, td {
@@ -143,7 +143,7 @@ td {
       </div>
  <?php if (!empty($row_login)) { ?>
       <h3 style="margin: 10px 5px;">Log-in to your account</h3>
-      <form id="form-login" action="<?=htmlentities($_SERVER['REQUEST_URI'])?>" autocomplete="off" method="post" accept-charset="utf-8">
+      <form id="form-login" action<?= /*'="' . htmlentities($_SERVER['REQUEST_URI']) . '"'*/ NULL;?> autocomplete="off" method="post" accept-charset="utf-8">
         <input type="hidden" name="token" value="<?=$_SESSION['token'] ?? '' ?>" />
         <table>
           <tr>
@@ -157,7 +157,7 @@ td {
           <tr>
             <td><small><a class="forgot" href="#" title="Feature does not work.">Forgot Password?</a></small></td>
             <td style="text-align: center">
-              <input type="checkbox" id="enable_ssl" name="enable_ssl" <?=(APP_HTTPS ? 'checked': '')?> />
+              <input type="checkbox" id="enable_ssl" name="enable_ssl" <?=(!defined('APP_HTTPS') ? 'checked' : '')?> />
               <small><label for="enable_ssl"> Enable SSL?</label></small>
             </td>
             <td style="text-align: left;">
@@ -171,7 +171,7 @@ td {
       </form>
 <?php } elseif (!empty($row_login)) { ?>
       <h3 style="margin: 10px 5px;">Register for your account</h3>
-      <form id="form-register" action="<?=htmlentities($_SERVER['REQUEST_URI'])?>" autocomplete="off" method="post" accept-charset="utf-8">
+      <form id="form-register" action<?= /*'="' . htmlentities($_SERVER['REQUEST_URI']) . '"'*/ NULL;?> autocomplete="off" method="post" accept-charset="utf-8">
         <table>
           <tr>
             <td><label for="name">Name:</label></td>
@@ -202,14 +202,14 @@ td {
 <?php } ?>
       </form>
 <?php } ?>
-      <div style="border-top: 1px dotted black; margin: 5px; line-height: 0px;">
-        <p style="text-align: right; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, array('.' => '_'))?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), array('.' => '')));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
+      <div style="position: relative; white-space: nowrap; border-top: 1px dotted black; margin: 5px; line-height: 0px; width: 400px;">
+        <p style="text-align: left; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, array('.' => '_'))?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), array('.' => '')));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
       </div>
     </div><!--end log-form -->
   
     <!-- JQUERY SCRIPTS -->
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
   
     <script type="text/javascript">
 $(document).ready(function(){

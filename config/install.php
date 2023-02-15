@@ -94,25 +94,25 @@ switch ($_SERVER['REQUEST_METHOD']) {
       
       switch ($_GET['db']) {
         case '':
-          //if (!$ob_contents) header('Location: ' . APP_BASE_URL . '?session');
+          //if (!$ob_contents) header('Location: ' . APP_URL_BASE . '?session');
           foreach (DB_NAME as $db_name) {
             if (!$ob_contents) {
               $stmt = $pdo->query('SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' . $db_name . '\';')
               or print_r($pdo->errorInfo(), true);
 
               if ((bool) $stmt->fetchColumn() == FALSE) 
-                die(header('Location: ' . APP_BASE_URL . '?db=' . $db_name));
+                die(header('Location: ' . APP_URL_BASE . '?db=' . $db_name));
 
             } else {
-              die(header('Location: ' . APP_BASE_URL));
+              die(header('Location: ' . APP_URL_BASE));
             }
           }
-          if (!$ob_contents) header('Location: ' . APP_BASE_URL . '?session');
+          if (!$ob_contents) header('Location: ' . APP_URL_BASE . '?session');
           break;
         default:
 
           if (!in_array($_GET['db'], DB_NAME))
-            header('Location: ' . APP_BASE_URL);
+            header('Location: ' . APP_URL_BASE);
 
           if (key($_POST) == 'method') {
             switch ($_POST['method']) {
@@ -210,8 +210,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
   
         $ob_contents = ob_get_contents();
         ob_end_clean();
-        if ($ob_contents) die(header('Location: ' . APP_BASE_URL . '?db=' . DB_NAME[0] ));
-        //else die(header('Location: ' . APP_BASE_URL));
+        if ($ob_contents) die(header('Location: ' . APP_URL_BASE . '?db=' . DB_NAME[0] ));
+        //else die(header('Location: ' . APP_URL_BASE));
       }
     }
     break;
@@ -253,20 +253,20 @@ foreach($files as $file) {
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><?=APP_NAME?> -- Installation</title>
     
-    <base href="<?=APP_BASE_URL?>" />
+    <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
 
-    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>favicon.ico" />
 
     <!-- BOOTSTRAP STYLES-->
-    <link rel="stylesheet" type="text/css" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/bootstrap/bootstrap.min.css" />
     
-    <link rel="stylesheet" type="text/css" href="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
 
 <?php
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST':
 ?>
-    <meta http-equiv="refresh" content="5;url=<?=APP_BASE_URL?>" />
+    <meta http-equiv="refresh" content="5;url=<?=APP_URL_BASE?>" />
 <?php
     break;
 }
@@ -346,9 +346,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
         <div class="card-header" style="position: relative; background-color: #6FA7D7; color: #000;">
-        <div style="float: left; padding-top: 5px;"><a href="<?= APP_BASE_URL; ?>" style="color: black; text-decoration:none;"><img src="assets/images/favicon.png" width="32" height="32" style=" background-color: white;"> <?= APP_NAME; ?> - Installation v<?=APP_VERSION?></a></div>
+        <div style="float: left; padding-top: 5px;"><a href="." style="color: black; text-decoration:none;"><img src="assets/images/favicon.png" width="32" height="32" style=" background-color: white;"> <?= APP_NAME; ?> - Installation v<?=APP_VERSION?></a></div>
         <div style="float: right;">
-        <a class="btn btn-primary" href="<?=APP_BASE_URL?>?session=login" style="">Login</a>
+        <a class="btn btn-primary" href="?session=login" style="">Login</a>
         </div>
         <div class="clearfix"></div>
         
@@ -357,7 +357,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 <?= (isset($ob_contents) && $ob_contents !== NULL ? 'Database (error) `' . $_GET['db'] . '` was not found:<br />' . $ob_contents : '' ); ?>
               <div style="height: 10px;"></div>
               <div style="height: 10px; float: right;">
-              <form style="float: right; margin-right: 10px;" action="<?=APP_BASE_URI . '?' . 'db=' . DB_NAME[0]?>" autocomplete="off" method="POST">
+              <form style="float: right; margin-right: 10px;" action="<?='?' . 'db=' . DB_NAME[0]?>" autocomplete="off" method="POST">
                 <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
                 <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>Backup</button>
               </form>
@@ -388,7 +388,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
               </div>
               <div style="position: absolute; width:90%; max-width:684px;">
                 <div id="installForm" style="z-index: 1; display: none; position: fixed; width: inherit; max-width: inherit; border: 1px solid #C6DCEF; padding: 10px; background-color: #E2EDF7; font-size: 14px; text-align: justify;">
-                  <form action="<?=APP_BASE_URI . '?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" style="text-align: left;" method="POST" enctype="multipart/form-data">
+                  <form action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" style="text-align: left;" method="POST" enctype="multipart/form-data">
                   <p>Install (Fresh)</p>
                   <table style="width: 650px; margin: 0 auto;">
                     <caption><input type="submit" name="method" value="create" style="margin-left: 0px; margin-bottom: 3px;" onclick="return confirm('Are you sure you want to CREATE a new database?'); " /> &nbsp;`<?= $_GET['db'] ?>` database</caption>
@@ -439,7 +439,7 @@ if (!empty($FoundFiles)) {
     . '                      <td style="text-align: center;"><input type="radio" name="create" value="' . $file . '" ' . ($key == 0 ? 'checked' : '') . '></td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . date("Y-m-d", filemtime(DB_BACK_PATH . '../' . $file)) .'</td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . "\n"
-    . '                        <a href="' . APP_BASE_URI . '?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="./assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
+    . '                        <a href="?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="./assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
     . '                      </td>' . "\n"
     . '                      <td>' . formatSizeUnits(filesize(DB_BACK_PATH . '../' . $file)) . '    </td>' . "\n"
     . '                    </tr>' . "\n";
@@ -451,7 +451,7 @@ if (!empty($FoundFiles)) {
                   </form>
                 </div>
                 <div id="recoveryForm" style="z-index: 0; display: none; position: fixed; width: inherit; max-width: inherit; border: 1px solid #C6DCEF;  padding: 10px 10px 0 10px; background-color: #E2EDF7; font-size: 14px; text-align: justify;">
-                  <form action="<?=APP_BASE_URI . '?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" style="text-align: left;" method="POST" enctype="multipart/form-data">
+                  <form action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" style="text-align: left;" method="POST" enctype="multipart/form-data">
                   <p>Recovery</p>
                   <table style="width: 650px; margin: 0 auto;">
                     <caption><input type="submit" name="method" value="restore" style="margin-left: 0px; margin-bottom: 3px;" onclick="return confirm('Are you sure you want to RESTORE a previous database?'); " /> `<?= $_GET['db'] ?>` database <span style="color: #000; float: right;"><small>**Restore files with the same <a title="Modified Timestamp" style="cursor: pointer;">getMTime();</a> will not be shown.</small></span></caption>
@@ -503,7 +503,7 @@ if (!empty($FoundFiles)) {
     . '                      <td style="text-align: center;"><input type="radio" name="restore" value="' . $file . '" ' . ($key == 0 ? 'checked' : '') . '></td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . date("Y-m-d", filemtime(DB_BACK_PATH . $file)) .'</td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . "\n"
-    . '                        <a href="' . APP_BASE_URI . '?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="./assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
+    . '                        <a href="?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="./assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
     . '                      </td>' . "\n"
     . '                      <td>' . formatSizeUnits(filesize(DB_BACK_PATH . $file)) . '    </td>' . "\n"
     . '                    </tr>' . "\n";
@@ -564,7 +564,7 @@ if (!empty($FoundFiles)) {
       </div>
     </div>
 
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/jquery/jquery.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
 <script>
 
 function showInstallForm() {
@@ -619,7 +619,7 @@ document.getElementById("q2_y").onclick = function() {
 }
 
 </script>    
-    <script src="<?='//' . APP_DOMAIN . APP_BASE_URI?>assets/js/bootstrap/bootstrap.min.js"></script>
+    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

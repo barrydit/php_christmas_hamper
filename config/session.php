@@ -98,7 +98,7 @@ if (isset($_SESSION['last_access']) && (time() - $_SESSION['last_access']) > SES
       'expires' => time() + SESSION_LIFETIME,
       'path' => '/', 
       'domain' => $_SERVER['HTTP_HOST'],
-      'secure' => APP_HTTPS,
+      'secure' => (!defined('APP_HTTPS') ? false : true),
       'httponly' => true,
       'samesite' => 'None'
     ]);
@@ -169,18 +169,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
       switch ($_GET['session']) {
         case 'login':
           if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
-            exit(header('Location: ' . APP_BASE_URL));
+            exit(header('Location: ' . APP_URL_BASE));
           else
-            require 'src/session_login.php';
+            require APP_PATH . 'src/session_login.php';
         break;
         case 'logout':
           if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
             require 'src/session_logout.php';
           else
-            exit(header('Location: ' . APP_BASE_URL));
+            exit(header('Location: ' . APP_URL_BASE));
         break;
         default:
-          exit(header('Location: ' . APP_BASE_URL . '?session=login'));
+          exit(header('Location: ' . APP_URL_BASE . '?session=login'));
         break;
       }
       exit(); 
@@ -188,10 +188,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
     if ( !isset($_SESSION['user_id']) || $_SESSION['user_id'] === NULL ) {
       //die(var_dump($_SESSION));
 
-      exit(header('Location: ' . APP_BASE_URL . '?session=login'));
+      exit(header('Location: ' . APP_URL_BASE . '?session=login'));
       //require '../src/session_login.php';
       //require 'install.php';  // <<< SESSION Bug exists follow the trail ...
-      //header('Location: ' . APP_BASE_URL . '?session');
+      //header('Location: ' . APP_URL_BASE . '?session');
     }
     break;
 }

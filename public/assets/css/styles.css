@@ -76,13 +76,13 @@ input[type="password"]:focus{
 }
 
 .log-form {
-    position: absolute;
-	top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-	border: 1px solid #000;
-    background-color: #f3f3f3;
-    width: 360px;
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #000;
+  background-color: #f3f3f3;
+  width: 400px;
 }
 
 #form-login #form-register {

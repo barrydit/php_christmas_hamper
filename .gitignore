@@ -1,8 +1,9 @@
 composer/
 composer.phar
-export/
 database/
 session/
+var/
 vendor/
 .env.development
 error_log
+.htaccess
