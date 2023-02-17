@@ -2,43 +2,45 @@
 
 defined('APP_BASE_PATH') // $_SERVER['DOCUMENT_ROOT']
   or define('APP_BASE_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR);
+
  
 require(APP_BASE_PATH . 'config/config.php');
 
+
+if (defined(APP_ENV) && APP_ENV == 'development') {
 // https://stackoverflow.com/questions/38396046/how-to-run-composer-update-on-php-server
 
-define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
-define('COMPOSER_INITED', file_exists(APP_BASE_PATH . 'vendor'));
+  define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
+  define('COMPOSER_INITED', file_exists(APP_BASE_PATH . 'vendor'));
 
-set_time_limit(100);
-ini_set('memory_limit',-1);
+  set_time_limit(100);
+  ini_set('memory_limit',-1);
 
-if (!getenv('HOME') && !getenv('COMPOSER_HOME')) {
+  if (!getenv('HOME') && !getenv('COMPOSER_HOME')) {
     putenv("COMPOSER_HOME=".HOME_DIRECTORY);
+  }
+
+  ini_set('phar.readonly',0);
+  if (!file_exists('composer')) {
+    if (!is_file(APP_BASE_PATH . 'composer.phar'))
+      file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
+    (new Phar("composer.phar"))->extractTo("./composer");
+  }
+
+  //This requires the phar to have been extracted successfully.
+  require_once ('composer/vendor/autoload.php');
 }
-
-// change directory to root
-chdir('../');
-
-ini_set('phar.readonly',0);
-if (!file_exists('composer')) {
-  if (!is_file(APP_BASE_PATH . 'composer.phar'))
-    file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
-  (new Phar("composer.phar"))->extractTo("./composer");
-}
-
-//This requires the phar to have been extracted successfully.
-require_once ('composer/vendor/autoload.php');
 
 //Use the Composer classes
 use Composer\Console\Application;
 use Composer\Command\UpdateCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 
-defined('COMPOSER_AUTOLOAD_PATH')
-  or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
+if (defined(APP_ENV) && APP_ENV == 'development') {
+  defined('COMPOSER_AUTOLOAD_PATH')
+    or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
 
-if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
+  if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
 
   //chdir();
   //shell_exec("cd ../ && php -f composer.phar", $output, $worked); // --dry-run --no-interaction --ansi
@@ -46,31 +48,31 @@ if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
 
 //Create the commands
 //$args = array('command' => 'self-update');
-$args = array('command' => 'update');
+  $args = array('command' => 'update');
 //$args = array('command' => 'config');
 
-if(!file_exists('vendor')) { 
-    echo "This is first composer run: --no-scripts option is applies\n";
-    $args['--no-scripts'] = true;   
+    if(!file_exists('vendor')) { 
+      echo "This is first composer run: --no-scripts option is applies\n";
+      $args['--no-scripts'] = true;   
     //$args['--global'] = NULL;
     //$args['--editor'] = true;
     //$args['--auth'] = [ "github-oauth" => [ "github.com" => "ghp_1XhQL4LghjghjghfjhlXqTfux51ZDHZz" ] ] ;
     //$args['--unset'] = [ "github-oauth" => [ "github.com" => "ghp_1XhQL4LWTl3KtyJmmWlIjfghjfghjfufgh" ] ] ;
     //$args['github-oauth.github.com'] = 'ghp_1XhQLfhgjgfjhghjghjux51ZDHZz';   
-}
-$input = new ArrayInput($args);
+    }
+    $input = new ArrayInput($args);
 
 //Create the application and run it with the commands
-$application = new Application();
-$application->setAutoExit(false);
-$application->setCatchExceptions(false);
-try {
+    $application = new Application();
+    $application->setAutoExit(false);
+    $application->setCatchExceptions(false);
+    try {
     //Running commdand php.ini allow_url_fopen=1 && proc_open() function available
-    $application->run($input);
-    echo 'Success';
-} catch (\Exception $e) {
-    echo 'Error: '.$e->getMessage()."\n";
-}
+      $application->run($input);
+      echo 'Success';
+    } catch (\Exception $e) {
+      echo 'Error: '.$e->getMessage()."\n";
+    }
 /*
   die(var_dump(shell_exec("cd ../ && php -f composer.phar")));
   //die(var_dump(shell_exec('composer config --global --auth github-oauth.github.com ghp_1XhQL4LWTl3Kghjfghjfghjjgfgh')));
@@ -82,15 +84,15 @@ try {
   die(var_dump(passthru('php composer.phar config --global --auth github-oauth.github.com ghp_1XbnmbnmbnmbnmqTfux51ZDHZz')));
   exec('php composer.phar update --no-interaction --quiet 2>&1', $output, $worked); // self-update
 */
-  die(header('Location: http://' . APP_BASE_URL));
-  
+    die(header('Location: http://' . APP_URL_BASE));
+  }
 } else 
-  require(COMPOSER_AUTOLOAD_PATH . 'autoload.php'); // composer dump -o
+  require(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'); // composer dump -o
 
 switch($_SERVER['SERVER_NAME']) {
   case stristr($_SERVER['SERVER_NAME'], isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']):
     if (!isset($_SERVER['HTTPS']) && @$_SESSION['enable_ssl'] == TRUE):
-      //exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_BASE_URL ))); // basename($_SERVER['REQUEST_URI']));
+      //exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE ))); // basename($_SERVER['REQUEST_URI']));
     endif;
     if ($_SERVER['SERVER_NAME'] == 'localhost') {
       if (!is_file(APP_BASE_PATH . '.env.' . APP_ENV))
@@ -107,14 +109,14 @@ switch($_SERVER['SERVER_NAME']) {
     
   default:
     if (!isset($_SERVER['HTTPS']) && @$_SESSION['enable_ssl'] == TRUE):
-      exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_BASE_URL . $_SERVER['QUERY_STRING'])));
+      exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE . $_SERVER['QUERY_STRING'])));
     endif;
     break;
 }
 
 $includeFiles = [
-  APP_BASE_PATH . '/config/database.php',
-  APP_BASE_PATH . '/config/session.php'
+  APP_BASE_PATH . 'config/database.php',
+  APP_BASE_PATH . 'config/session.php'
 ];
 
 foreach($includeFiles as $includeFile) {
@@ -124,7 +126,6 @@ foreach($includeFiles as $includeFile) {
   }
   require $includeFile;
 }
-
 
 switch ($_SERVER['REQUEST_METHOD']) {
 /*
@@ -138,6 +139,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $setting['del_prev_annual_hamper'] = true;
       
       if ($setting['del_prev_annual_hamper']) {
+      
+      /*
+        Look for 1 hamper, at the bottom of the list, where the YEAR(`createed_date`) is less than date('Y')
+
+          If found, look for 1 hamper, at the bottom of the list, where the YEAR(`created_date`) is equal to this year
+
+          [Cancels/Requires] having multiple years (current year, and before) at the same time, before they are deleted.
+
+
+
+      */
       
         $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
         $stmt->execute(array(
@@ -162,7 +174,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
             ));
         
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
-              $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) = :date ;');
+              $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
               $stmt->execute(array(
                 ":date" => date('Y')
               ));

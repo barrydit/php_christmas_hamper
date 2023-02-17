@@ -301,7 +301,7 @@ HERE); // ORDER BY sort, hamper_no,
 
       //$stmt = $pdo->prepare("SELECT `last_name`, `first_name`, COUNT(last_name) as count FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name GROUP BY `last_name`" . (count($full_name) == 2 ? ', `first_name`' : '') . (count($full_name) == 1 ? ' HAVING COUNT(`last_name`) >= 1' : '') . ";");
       
-      $stmt = $pdo->prepare("SELECT `last_name`, `first_name` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ORDER BY `last_name` ASC;");
+      $stmt = $pdo->prepare("SELECT `last_name`, `first_name` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ORDER BY `last_name` ASC LIMIT 10;");
 
       $stmt->execute(array(
         ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'),
@@ -637,7 +637,7 @@ function full_name_input() {
       // yourCallbackHere()
       //alert(opts[i].value);
       full_name_form = document.getElementById('full_name_frm');
-      full_name_form.submit.click();
+      full_name_form.submit();
       break;
     }
   }

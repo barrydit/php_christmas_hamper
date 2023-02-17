@@ -3,6 +3,8 @@ if (count(get_included_files()) == ((version_compare(PHP_VERSION, '5.0.0', '>=')
   exit('Direct access is not allowed.');
 endif;
 
+// die(var_dump(get_included_files()));
+
 require_once 'functions.php';
 
 // https://code.tutsplus.com/tutorials/organize-your-next-php-project-the-right-way--net-5873
@@ -17,7 +19,7 @@ isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] == 'on'
   and define('APP_HTTPS', TRUE);
 
 define('APP_NAME',      'Christmas Hamper ' . date('Y'));
-define('APP_DOMAIN', isset($_SERVER['HTTP_HOST']) === true ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
+define('APP_DOMAIN',    isset($_SERVER['HTTP_HOST']) === true ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
 define('APP_VERSION',   number_format(1.0, 1) . '.1');
 define('APP_TIMEOUT',   strtotime('1970-01-01 24:00:00'.'GMT'));
 define('APP_START',     microtime(true));
@@ -29,9 +31,8 @@ preg_match('/^(\/home\/\w+\/).+$/', dirname(__DIR__, 1), $matches)
 
 // absolute pathname 
 basename(__DIR__) == 'config' ?
-  define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR) : // ./localhost/../
+  define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR) . chdir('../'): // ./localhost/../
   define('APP_PATH', __DIR__ . DIRECTORY_SEPARATOR); // /var/www/html/
-
 
 //ini_set("include_path", "src");
 ini_set('log_errors', 1);
@@ -49,7 +50,7 @@ if (!isset($_SERVER['REQUEST_URI']))  {
 }
 
 substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) == '/'  // $_SERVER['DOCUMENT_ROOT']
-  or define('APP_BASE', [// https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
+  or define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
     'config' => (!is_dir(APP_PATH . 'config') ? NULL : 'config' . DIRECTORY_SEPARATOR),
     'database' => (!is_dir(APP_PATH . 'database') ? NULL : 'database' . DIRECTORY_SEPARATOR),
     'public' => (!is_dir(APP_PATH . 'public') ? NULL : 'public' . DIRECTORY_SEPARATOR),

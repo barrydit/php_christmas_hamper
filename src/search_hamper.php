@@ -532,7 +532,7 @@ $_GET = $_GET + (array) ['date' => ''];
   $stmt->execute(array());
 
   while ($row_dates = $stmt->fetch()) {
-    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"'. (!empty($date) && $date == $row_dates['YEAR(`created_date`)'] ? ' selected="selected"' : '') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
+    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"'. (!empty($date) && $date == $row_dates['YEAR(`created_date`)'] ? '' : ' selected="selected"') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
   }
 ?>
           </select>

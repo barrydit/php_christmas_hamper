@@ -6,7 +6,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 */
-$json = file_get_contents('session/sessions.json', true);
+$json = file_get_contents(SESSION_SAVE_PATH . 'sessions.json', true);
 $json_decode = json_decode($json, true);
 
 $visitor_count = 0;
@@ -104,11 +104,9 @@ if (!extension_loaded('gd')) { ?>
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /></a> Home | <a href="?reports">Reports</a> | Search &#11106; <a href="?search=clients" style="text-decoration: none;">Clients</a> : <a href="?search=hampers" style="text-decoration: none;">Hampers</a>
-        <form style="float: right;" action="<?=APP_URL_PATH . '?'?>" autocomplete="off" method="GET">
-          <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
-        </form>
-        <form style="float: right; margin-right: 10px;" action="<?='?'?>" autocomplete="off" method="GET">
-          <button type="submit" name="db" value="<?= DB_NAME[0]; ?>" style="float: right; width: 7em;">Database</button>
+        <form style="float: right;" action autocomplete="off" method="GET">
+          <button type="submit" name="db" value="<?= DB_NAME[0]; ?>" style="width: 7em; margin-right: 3px;">Database</button>
+          <button type="submit" name="client" value="entry" style="width: 7em; margin-left: 3px;">New Client</button>
         </form>
       </h3>
     </div>
@@ -116,7 +114,7 @@ if (!extension_loaded('gd')) { ?>
   
  
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form id="full_name_frm" method="POST" action="<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />

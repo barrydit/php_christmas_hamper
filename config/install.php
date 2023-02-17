@@ -131,7 +131,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 $sql = 'CREATE DATABASE `' . $_GET['db'] . '`;';
                 $pdo->exec($sql);
-                echo "<p>Database created successfully</p>";
+                echo "<p>Database schema was created successfully</p>";
 
                 //$pdo->close();
 
@@ -140,7 +140,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 . ' --user=' . DB_UNAME
                 . (empty(DB_PWORD) ? '' : ' --password=' . DB_PWORD)
                 . ' ' . $_GET['db']
-                . ' < ' . '"..' . APP_DB . DB_NAME[0] . '_schema.sql' . '"';
+                . ' < ' . '"../' . APP_BASE['database'] . DB_NAME[0] . '_schema.sql' . '"';
                 //die(var_dump($command));
                 exec($command,$output,$worked);
                 switch($worked){
@@ -358,22 +358,22 @@ switch ($_SERVER['REQUEST_METHOD']) {
               <div style="height: 10px;"></div>
               <div style="height: 10px; float: right;">
               <form style="float: right; margin-right: 10px;" action="<?='?' . 'db=' . DB_NAME[0]?>" autocomplete="off" method="POST">
-                <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : '<caption><div style="color: red;">Please Backup!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
-                <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>Backup</button>
+                <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '<caption><div style="color: red;">Please Backup!</div></caption>' : '<caption><div style="color: green;">Thank You!</div></caption>') : '<caption><div style="color: red;">Please Backup First!</div></caption>')?>
+                <button type="submit" name="method" value="backup" style="float: right; width: 7em;" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) < strtotime(date('Y-m-d')) ? '' : 'disabled=""'  ) : '')?>>Backup</button>
               </form>
               </div>
               <div>Please use this feature at your very OWN discretion...</div><br />
               <ul>
               <li>
                 <fieldset id="group1">
-                Is this a fresh (new) install? <input type="radio" id="q_n" name="q_fresh-install" value="no" onclick="handleClick(this);" />
+                Is this a fresh (new) install? <input type="radio" id="q_n" name="q_fresh-install" value="no" onclick="handleClick(this);" <?=(!empty(glob(APP_PATH . APP_BASE['database'] . 'backup/*.sql')) ? '' : 'disabled=""') ?> />
                 <label for="q_n">No</label>
                 <input type="radio" id="q_y" name="q_fresh-install" value="yes" onclick="handleClick(this);" />
                 <label for="q_y">Yes</label>
                 </fieldset>
               </li>
               <li>
-                <fieldset id="group2" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? '' : 'disabled=""') : '')?>>
+                <fieldset id="group2" <?=(is_file(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql') ? (strtotime(date("Y-m-d", filemtime(DB_BACK_PATH . DB_NAME[0] . '___(' . date('Y') . ').sql' ))) > strtotime(date('Y-m-d')) ? 'disabled=""' : '') : '')?>>
                 Or are you trying to recover from a backup? <input type="radio" id="q2_n" name="q2_recover" value="no" onclick="handleClick(this);" />
                 <label for="q2_n">No</label>
                 <input type="radio" id="q2_y" name="q2_recover" value="yes" onclick="handleClick(this);" />
@@ -503,7 +503,7 @@ if (!empty($FoundFiles)) {
     . '                      <td style="text-align: center;"><input type="radio" name="restore" value="' . $file . '" ' . ($key == 0 ? 'checked' : '') . '></td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . date("Y-m-d", filemtime(DB_BACK_PATH . $file)) .'</td>' . "\n"
     . '                      <td style="padding-left: 10px; padding-right: 10px;">' . "\n"
-    . '                        <a href="?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="./assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
+    . '                        <a href="?' . http_build_query(array_merge(APP_QUERY, array('download'=>$file)), '', '&amp;') . '"><img src="assets/images/dl_ico.gif" style="vertical-align: middle;" alt="Load Icon" />&nbsp;' . $file . '</a>' . "\n"  
     . '                      </td>' . "\n"
     . '                      <td>' . formatSizeUnits(filesize(DB_BACK_PATH . $file)) . '    </td>' . "\n"
     . '                    </tr>' . "\n";
@@ -554,7 +554,7 @@ if (!empty($FoundFiles)) {
 <?= $ob_contents; ?>
                 <br /><br />
                 <ol>
-                  <li><a href="?db=<?= DB_NAME; ?>">Install `<?= DB_NAME; ?>`</a></li>
+                  <li><a href="?db=<?= DB_NAME[0]; ?>">Install `<?= DB_NAME[0]; ?>`</a></li>
                 </ol>
               </div>
 <?php } } ?>
@@ -572,13 +572,13 @@ function showInstallForm() {
     // Animation complete.
   });
   $( "#recoveryForm" ).css('display') == 'none';
-  console.log('testing ');
+  //console.log('testing ');
   
   $( '#installForm' ).slideDown( "slow", function() {
     // Animation complete.
   });
   $( "#installForm" ).css('display') == 'block';
-  console.log('testing ');
+  //console.log('testing ');
 }
 
 function showRecoveryForm() {
@@ -586,12 +586,12 @@ function showRecoveryForm() {
     // Animation complete.
   });
   $( "#installForm" ).css('display') == 'block';
-  console.log('testing ');
+  //console.log('testing ');
   $( '#recoveryForm' ).slideDown( "slow", function() {
     // Animation complete.
   });
   $( "#recoveryForm" ).css('display') == 'none';
-  console.log('testing ');
+  //console.log('testing ');
 }
 
 document.getElementById("q_n").onclick = function() {

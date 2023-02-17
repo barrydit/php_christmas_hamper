@@ -81,7 +81,7 @@ foreach(DB_TABLES as $key => $table) {
       if ($pdo->errorInfo()[1] == '1146') { // $e->getCode() == '42S02';  1146
         preg_match("/^Table\s['](\w+).(\w+)[']\sdoesn't\sexist$/", $pdo->errorInfo()[2], $matches);
         if ($matches[2] == 'users') {
-          $pdo->query('CREATE TABLE `users` ( `id` int(11) NOT NULL, `name` varchar(255) NOT NULL, `username` varchar(25) NOT NULL, `password` varchar(255) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
+          $pdo->query('CREATE TABLE `users` (`id` int(11) NOT NULL, `name` varchar(255) NOT NULL, `username` varchar(25) NOT NULL, `password` varchar(255) NOT NULL ) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
           $pdo->query('INSERT INTO `users` (`id`, `name`, `username`, `password`) VALUES (1, \'Owner\', \'root\', \'$2y$12$Cz/AlKIOBS7aAJ8Qoy2AFOua4A9VLzHLyX0vaweWc7SP3JA/MwU2C\');');
           $pdo->query('ALTER TABLE `users` ADD PRIMARY KEY (`id`);');
           $pdo->query('ALTER TABLE `users` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;');
@@ -101,15 +101,15 @@ foreach(DB_TABLES as $key => $table) {
         }
       }
       mkdir(DB_BACK_PATH, 0700, true);
-      file_put_contents(APP_BASE_PATH . '.env.development', "DB_UNAME=root\nDB_PWORD=");
+      file_put_contents(APP_PATH . '.env.development', "DB_UNAME=root\nDB_PWORD=");
     } else {
-
       $command = 'mysql'
       . ' --host=' . DB_HOST
       . ' --user=' . DB_UNAME
       . (empty(DB_PWORD) ? '' : ' --password=' . DB_PWORD)
       . ' ' . DB_NAME[0]
-      . ' < ' . '"..' . APP_DB . DB_NAME[0] . '_schema.sql' . '"';
+      . ' < ' . '"../' . APP_BASE['database'] . DB_NAME[0] . '_schema.sql' . '"';
+
       exec($command,$output,$worked);
       ob_start();
       print_r($output); //echo '<i>' . $output . '</i>';

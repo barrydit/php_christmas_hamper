@@ -8,7 +8,7 @@ require_once 'config.php';
 // require_once 'database.php';
 
 defined('SESSION_SAVE_PATH')
-  or define('SESSION_SAVE_PATH', APP_BASE_PATH . DIRECTORY_SEPARATOR . 'session'); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' . 
+  or define('SESSION_SAVE_PATH', APP_BASE_PATH . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' . 
 
 defined('SESSION_LIFETIME')
   or define('SESSION_LIFETIME', APP_TIMEOUT);  // 0
@@ -86,11 +86,11 @@ if (!isset($_SESSION['last_access']))
 
 if (isset($_SESSION['last_access']) && (time() - $_SESSION['last_access']) > SESSION_LIFETIME ) {
   error_log('Client was (auto) logged out. $_SESSION["last_access"] = ' . $_SESSION["last_access"] . '   $time = ' . time() . '    == ' . (time() - $_SESSION['last_access']));
-  // some reason the /session 's get clogged up ... clean them up
-  if (is_file(SESSION_SAVE_PATH . "/sess_" . session_id()))
-    array_map('unlink', SESSION_SAVE_PATH . "/sess_" . session_id());
+  // some reason the session 's get clogged up ... clean them up
+  if (is_file(SESSION_SAVE_PATH . "sess_" . session_id()))
+    array_map('unlink', SESSION_SAVE_PATH . "sess_" . session_id());
   else
-    array_map('unlink', glob(SESSION_SAVE_PATH . "/sess_*")); 
+    array_map('unlink', glob(SESSION_SAVE_PATH . "sess_*")); 
   //exit(header('Location: ' . APP_BASE_URL . '?session=logout')); // 
 } else {
   if (ini_get('session.cookie_lifetime') !== 0) // Does this work?
@@ -138,11 +138,11 @@ else if (time() - $_SESSION['created'] > 1800) {
 if (!is_dir(SESSION_SAVE_PATH))
   mkdir(SESSION_SAVE_PATH);
 
-if (!is_file(SESSION_SAVE_PATH . '/sessions.json')) touch(SESSION_SAVE_PATH . '/sessions.json');
-$json = file_get_contents(SESSION_SAVE_PATH . '/sessions.json', true);
+if (!is_file(SESSION_SAVE_PATH . 'sessions.json')) touch(SESSION_SAVE_PATH . 'sessions.json');
+$json = file_get_contents(SESSION_SAVE_PATH . 'sessions.json', true);
 $json_decode = json_decode($json, true);
 
-$files = glob(SESSION_SAVE_PATH . '/sess_*');
+$files = glob(SESSION_SAVE_PATH . 'sess_*');
 
 foreach($files as $key => $file) {
   //$files = (array) [ltrim(basename($file), 'sess_')];
@@ -159,7 +159,7 @@ foreach($files as $key => $file) {
     if (isset($json_decode[$key])) $files[$key] = $json_decode[$key];
 }
 
-file_put_contents(SESSION_SAVE_PATH . '/sessions.json', json_encode($files), LOCK_EX);
+file_put_contents(SESSION_SAVE_PATH . 'sessions.json', json_encode($files), LOCK_EX);
 
 
 switch ($_SERVER['REQUEST_METHOD']) {
