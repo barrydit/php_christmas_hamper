@@ -3,11 +3,9 @@
 defined('APP_BASE_PATH') // $_SERVER['DOCUMENT_ROOT']
   or define('APP_BASE_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR);
 
- 
 require(APP_BASE_PATH . 'config/config.php');
 
-
-if (defined(APP_ENV) && APP_ENV == 'development') {
+if (defined('APP_ENV') && APP_ENV == 'development') {
 // https://stackoverflow.com/questions/38396046/how-to-run-composer-update-on-php-server
 
   define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
@@ -32,11 +30,11 @@ if (defined(APP_ENV) && APP_ENV == 'development') {
 }
 
 //Use the Composer classes
-use Composer\Console\Application;
-use Composer\Command\UpdateCommand;
-use Symfony\Component\Console\Input\ArrayInput;
+//use Composer\Console\Application;
+//use Composer\Command\UpdateCommand;
+//use Symfony\Component\Console\Input\ArrayInput;
 
-if (defined(APP_ENV) && APP_ENV == 'development') {
+if (defined('APP_ENV') && APP_ENV == 'development') {
   defined('COMPOSER_AUTOLOAD_PATH')
     or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
 
@@ -86,8 +84,9 @@ if (defined(APP_ENV) && APP_ENV == 'development') {
 */
     die(header('Location: http://' . APP_URL_BASE));
   }
-} else 
-  require(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'); // composer dump -o
+} //else 
+
+require(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'); // composer dump -o
 
 switch($_SERVER['SERVER_NAME']) {
   case stristr($_SERVER['SERVER_NAME'], isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']):
@@ -98,10 +97,10 @@ switch($_SERVER['SERVER_NAME']) {
       if (!is_file(APP_BASE_PATH . '.env.' . APP_ENV))
         file_put_contents(APP_BASE_PATH . '.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=");
     }
-    if(class_exists('Dotenv')) {
+    //if(class_exists('Dotenv')) {
       $dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.' . APP_ENV);
       $dotenv->safeLoad();
-    } else {
+    if (empty($_ENV)) {
       $_ENV['DB_UNAME'] = 'root';
       $_ENV['DB_PWORD'] = '';
     }

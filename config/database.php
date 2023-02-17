@@ -124,3 +124,4 @@ foreach(DB_TABLES as $key => $table) {
     exit;
   }
 }
+

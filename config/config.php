@@ -3,8 +3,6 @@ if (count(get_included_files()) == ((version_compare(PHP_VERSION, '5.0.0', '>=')
   exit('Direct access is not allowed.');
 endif;
 
-// die(var_dump(get_included_files()));
-
 require_once 'functions.php';
 
 // https://code.tutsplus.com/tutorials/organize-your-next-php-project-the-right-way--net-5873
@@ -31,7 +29,17 @@ preg_match('/^(\/home\/\w+\/).+$/', dirname(__DIR__, 1), $matches)
 
 // absolute pathname 
 basename(__DIR__) == 'config' ?
-  define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR) . chdir('../'): // ./localhost/../
+  define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR)
+  . chdir('../')
+  . define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
+    'config' => (!is_dir(APP_PATH . 'config') ? NULL : 'config' . DIRECTORY_SEPARATOR),
+    'database' => (!is_dir(APP_PATH . 'database') ? NULL : 'database' . DIRECTORY_SEPARATOR),
+    'public' => (!is_dir(APP_PATH . 'public') ? NULL : 'public' . DIRECTORY_SEPARATOR),
+    'src' => (!is_dir(APP_PATH . 'src') ? NULL : 'src' . DIRECTORY_SEPARATOR),
+    'var/tmp' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR),
+    'export' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR),
+    'session' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR),
+  ]) : // ./localhost/../
   define('APP_PATH', __DIR__ . DIRECTORY_SEPARATOR); // /var/www/html/
 
 //ini_set("include_path", "src");
@@ -49,31 +57,22 @@ if (!isset($_SERVER['REQUEST_URI']))  {
     $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
 }
 
-substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) == '/'  // $_SERVER['DOCUMENT_ROOT']
-  or define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
-    'config' => (!is_dir(APP_PATH . 'config') ? NULL : 'config' . DIRECTORY_SEPARATOR),
-    'database' => (!is_dir(APP_PATH . 'database') ? NULL : 'database' . DIRECTORY_SEPARATOR),
-    'public' => (!is_dir(APP_PATH . 'public') ? NULL : 'public' . DIRECTORY_SEPARATOR),
-    'src' => (!is_dir(APP_PATH . 'src') ? NULL : 'src' . DIRECTORY_SEPARATOR),
-    'var/tmp' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR),
-    'export' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR),
-    'session' => (!is_dir(APP_PATH . 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR) ? NULL : 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR),
-  ]);
-
-!is_file(APP_PATH.'.env.production')
-  and (APP_DOMAIN == 'localhost' ?
-    (!is_file(APP_PATH.'.env.development') ?
-      (!@touch(APP_PATH.'.env.development') ? define('APP_ENV', 'development') : define('APP_ENV', 'development') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=")) :
-      define('APP_ENV', 'development')) :
-    (!is_file(APP_PATH.'.env.production') ? 
-      (!@touch(APP_PATH.'.env.production') ? define('APP_ENV', 'production') : define('APP_ENV', 'production') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=\nDB_PWORD=")) :
-      define('APP_ENV', 'production')));
+if (APP_DOMAIN != 'localhost')
+  (!is_file(APP_PATH.'.env.production') ? 
+    (!@touch(APP_PATH.'.env.production') ? define('APP_ENV', 'production') : define('APP_ENV', 'production') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=\nDB_PWORD=")) :
+    define('APP_ENV', 'production')
+  );
+else
+  (!is_file(APP_PATH.'.env.development') ?
+    (!@touch(APP_PATH.'.env.development') ? define('APP_ENV', 'development') : define('APP_ENV', 'development') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=")) :
+      define('APP_ENV', 'development')
+  );
 
 // substr( str_replace('\\', '/', __FILE__), strlen($_SERVER['DOCUMENT_ROOT']), strrpos(str_replace('\\', '/', __FILE__), '/') - strlen($_SERVER['DOCUMENT_ROOT']) + 1 )
 substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) == '/' ? // $_SERVER['DOCUMENT_ROOT']
-  define('APP_URL', 'http' . (defined('APP_HTTPS') ?? 's') . '://' . APP_DOMAIN . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1)) :
+  define('APP_URL', 'http' . (defined('APP_HTTPS') ? 's':'') . '://' . APP_DOMAIN . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1)) :
   define('APP_URL', [
-    'scheme' => 'http' . (defined('APP_HTTPS') ?? 's'), // ($_SERVER['HTTPS'] == 'on', (isset($_SERVER['HTTPS']) === true ? 'https' : 'http')
+    'scheme' => 'http' . (defined('APP_HTTPS') ? 's':''), // ($_SERVER['HTTPS'] == 'on', (isset($_SERVER['HTTPS']) === true ? 'https' : 'http')
     'host' => (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']),
     'port' => $_SERVER['SERVER_PORT'],
     'user' => (!isset($_SERVER['PHP_AUTH_USER']) ? NULL : $_SERVER['PHP_AUTH_USER']),
