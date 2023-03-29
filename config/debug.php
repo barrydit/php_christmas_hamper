@@ -37,7 +37,7 @@ if (isset($_GET['debug'])) {
 <head>
 <style>
 body { background-color: #fff; }
-</style>'
+</style>
 HTML;
 echo <<<SCRIPT
 <script>
