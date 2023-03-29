@@ -73,6 +73,68 @@ echo <<<SCRIPT
 });
 chart.render();
 
+var chart2 = new CanvasJS.Chart("chartContainer2", {
+	animationEnabled: true,
+	title: {
+		text: "Source code vs (Un)Executed code"
+	},
+	data: [{
+		type: "pie",
+		startAngle: 0,
+		yValueFormatString: "##0.00\"%\"",
+		indexLabel: "{label} {y}",
+		dataPoints: [
+
+SCRIPT;
+
+ob_start();
+$sql_lines = 0;
+foreach (glob("database/*.sql") as $filename) {
+  $lines = count(file($filename));
+  $sql_lines += $lines;
+  //echo '			{y: ' . abs(round((1 - $lines / $total_lines) * 100 - 100, 2)) . ', label: "' . (basename(dirname($requireFile, 1)) == 'public' ? 'public/' : '') . pathinfo(basename($requireFile), PATHINFO_FILENAME) . '"},' . "\n";
+}
+ob_end_clean();
+
+ob_start();
+$loaded_lines = 0;
+echo '			{y: ' . abs(round((1 - $sql_lines / $total_lines) * 100 - 100, 2)) . ', label: "[sql schema]"},' . "\n";
+
+$total_lines -= $sql_lines;
+foreach(get_required_files() as $requireFile) {
+  if (basename(dirname($requireFile, 2)) == 'vendor')
+    continue; // $lines = count(file($requireFile));
+  if (basename(dirname($requireFile, 3)) == 'vendor')
+    continue; // $lines = count(file($requireFile));
+  elseif (basename(dirname($requireFile, 4)) == 'vendor')
+    continue;
+  elseif (basename(dirname($requireFile, 5)) == 'vendor')
+    continue;
+  elseif (basename(dirname($requireFile, 6)) == 'vendor')
+    continue;
+  else
+    $lines = count(file($requireFile));
+  $loaded_lines += $lines;
+  echo '			{y: ' . abs(round((1 - $lines / $total_lines) * 100 - 100, 2)) . ', label: "' . (basename(dirname($requireFile, 1)) == 'public' ? 'public' : pathinfo(basename($requireFile), PATHINFO_FILENAME)) . '"},' . "\n";
+}
+$output = ob_get_contents();
+ob_end_clean();
+
+echo '			{y: ' . round((1 - ($loaded_lines + $sql_lines) / $total_lines) * 100, 2) . ', label: "[source]"},' . "\n";
+
+echo $output;
+//echo '			{y: 7.31, label: "public/index"},' . "\n";
+//echo '			{y: 4.00, label: "config"},' . "\n";
+//echo '			{y: 7.06, label: "database"},' . "\n";
+//echo '			{y: 1.26, label: "debug"},' . "\n";
+//echo '			{y: 4.91, label: "functions"}' . "\n";
+
+echo <<<SCRIPT
+		]
+	}]
+});
+chart2.render();
+
 }
 </script>
 SCRIPT;
