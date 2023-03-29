@@ -4,194 +4,234 @@ if (count(get_included_files()) == ((version_compare(PHP_VERSION, '5.0.0', '>=')
 endif;
 
 require_once 'config.php';
+require_once 'database.php';
 
-// require_once 'database.php';
+/* https://stackoverflow.com/questions/3791667/php-sessions-not-extending-cookie-expiration-on-each-request?rq=1 */
 
 defined('SESSION_SAVE_PATH')
-  or define('SESSION_SAVE_PATH', APP_BASE_PATH . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' . 
+  or define('SESSION_SAVE_PATH', APP_PATH . rtrim(APP_BASE['session'], DIRECTORY_SEPARATOR)); // session_save_path() | ini_get ('session.save_path')
 
 defined('SESSION_LIFETIME')
-  or define('SESSION_LIFETIME', APP_TIMEOUT);  // 0
+  or define('SESSION_LIFETIME', APP_TIMEOUT);
 
-
-//echo '<pre>';
-//print_r(get_defined_constants(true)['user']);
-//echo '</pre>';
-/*
-session_set_cookie_params([
-  'lifetime' => SESSION_LIFETIME, // expires in 15 minutes
-  'path' => '/', // ;SameSite=none', // <-- this way! // any path on same domain 
-  'secure' => APP_HTTPS, // $session_secure
-  'httponly' => true, // $cookie_httponly
-  'samesite' => 'Lax'
-]);
-*/
-//if (!headers_sent()) {
-// server should keep session data for 1 hour
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME); // 
-//ini_set('session.gc_probability', 1);
-//ini_set('session.gc_divisor', 1);
-
-ini_set('session.cookie_lifetime', SESSION_LIFETIME);
-//ini_set('session.cache_expire', APP_TIMEOUT);
-//ini_set('session.name', 'sessions'); // APP_NAME . '.ca'
-
-//ini_set('session.hash_function', 1);
-//ini_set('session.hash_bits_per_character', 6);
-
-//ini_set('session.save_path', APP_PATH . '.sessions');
-
-// each client remember their session id for exactly 1 hour
-// session_set_cookie_params(APP_TIMEOUT); << 
-
-//ini_set("session.use_cookies", 0);
-//ini_set('session.use_only_cookies', '0');
-//ini_set("session.use_trans_sid", 1);
 ini_set('session.save_path', SESSION_SAVE_PATH);
-ini_set('session.gc_probability', 100);
-ini_set('session.gc_divisor', 1);
+
+$_SESSIONS = array();
+
+if (ini_get("session.use_cookies"))
+  if (key($_GET) == 'logout' && isset($_COOKIE['PHPSESSID'])) {
+    unset($_COOKIE['PHPSESSID']);
+    setcookie(session_name(), '', -1, '/'); // time() - 3600
+  }
+
+!isset($_COOKIE['PHPSESSID']) || $_COOKIE['PHPSESSID'] == '' // $_COOKIE['PHPSESSID'] = session_create_id();
+  and setcookie('PHPSESSID', session_create_id(), 0 /* time()+3600 */) . exit(header('Location: ' . APP_URL_BASE));
+
+$session_save = function () {
+  global $_SESSIONS;
+  file_put_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', $json = json_encode($_SESSIONS), LOCK_EX);
+};
+
+function sess_serialize($array, $safe = true) {
+  if( $safe = true ) $array = unserialize(serialize( $array ));
+  $raw = '' ;
+  $line = 0 ;
+  $keys = array_keys( $array ) ;
+  foreach( $keys as $key ) {
+    $value = $array[ $key ] ;
+    $line ++ ;
+    $raw .= $key .'|' ;
+    if( is_array( $value ) && isset( $value['huge_recursion_blocker_we_hope'] ))
+      $raw .= 'R:'. $value['huge_recursion_blocker_we_hope'] . ';';
+    else
+     $raw .= serialize( $value ) ;
+    $array[$key] = Array( 'huge_recursion_blocker_we_hope' => $line ) ;
+  }
+  return $raw;
+}
+
+function sess_unserialize($str_data) {
+  $session = array();
+  while ($i = strpos($str_data, '|'))
+  {
+    $k = substr($str_data, 0, $i);
+    $v = unserialize(substr($str_data, 1 + $i));
+    $str_data = substr($str_data, 1 + $i + strlen(serialize($v)));
+    $session[$k] = $v;
+  }
+  return $session;
+}
+
+/*
+$json_temp = <<<JSON
+{
+    "cdyt6hrd6ed5y65y4e554r4ree": {
+        "status": "active",
+	    "created": "114836599",
+		"last_access": "114836599",
+		"user_id": 1,
+		"visitor_id": null,
+		"ip_addr": "192.168.0.254",
+		"user_agent": "Mozilla\\/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko\\/20100101 Firefox\\/110.0"
+	}
+}
+JSON;
+*/
+// < less-than
+// > greater-than
+
+$session = [(is_file(APP_PATH . APP_BASE['session'] . 'sess_' . $_COOKIE["PHPSESSID"]) ? $_COOKIE["PHPSESSID"] : $_COOKIE["PHPSESSID"] ) => ['created' => time(), 'last_access' => time(), 'user_id' => '', 'visitor_id' => '', 'patient_id' => '', 'status' => 'inactive', 'ip_addr' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]];
+
+$_SESSIONS = json_decode((!is_file(APP_PATH . APP_BASE['session'] . 'sessions.json') ? 
+  (!@touch(APP_PATH . APP_BASE['session'] . 'sessions.json') ? 
+    (!file_get_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', true) ? json_encode($session) : file_get_contents(APP_PATH . APP_BASE['session'] . 'session.json', true)) :
+    (!@file_put_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', $json = json_encode($session), LOCK_EX) ?: $json)
+  ) :
+  (!file_get_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', true) ? json_encode($session) : file_get_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', true))
+), true);
+
+define('SESSION', [
+  'created' => (isset($_SESSIONS[$_COOKIE["PHPSESSID"]]['created']) ? $_SESSIONS[$_COOKIE["PHPSESSID"]]['created'] : time()),
+  'last_access' => (isset($_SESSIONS[$_COOKIE["PHPSESSID"]]['last_access']) ? $_SESSIONS[$_COOKIE["PHPSESSID"]]['last_access'] : time()),
+  'user_id' => (isset($_SESSIONS[$_COOKIE["PHPSESSID"]]['user_id']) ? $_SESSIONS[$_COOKIE["PHPSESSID"]]['user_id'] : NULL)
+] //sess_unserialize(file_get_contents(APP_PATH . APP_BASE['session'] . 'sess_' . $_COOKIE['PHPSESSID'], true))
+);
+
+if (empty($_SESSIONS))
+  $_SESSIONS[$_COOKIE["PHPSESSID"]] = $session[$_COOKIE["PHPSESSID"]];
+else if (array_key_exists($_COOKIE["PHPSESSID"], $_SESSIONS)) {
+  if (isset($_SESSIONS[$_COOKIE["PHPSESSID"]]['status']) && (time() - $_SESSIONS[$_COOKIE["PHPSESSID"]]['last_access']) < SESSION_LIFETIME) {
+    $_SESSIONS[$_COOKIE["PHPSESSID"]] = [
+      'created' => time(),
+      'last_access' => time(),
+      'user_id' => $_SESSIONS[$_COOKIE["PHPSESSID"]]['user_id'], /* stage 1 */
+      'visitor_id' => '',
+      'patient_id' => '',
+      'status' => 'active',
+      'ip_addr' => $_SERVER['REMOTE_ADDR'],
+      'user_agent' => $_SERVER['HTTP_USER_AGENT']
+    ];
+  } else
+    $_SESSIONS[$_COOKIE["PHPSESSID"]]['status'] = 'inactive';
+} else
+  $_SESSIONS[$_COOKIE["PHPSESSID"]] = $session[$_COOKIE["PHPSESSID"]];
+
+foreach (array_keys($_SESSIONS) as $session_id) {
+  if ( empty($session_id) ) continue;
+  if (!is_file(APP_BASE['session'] . 'sess_' . $session_id)) {
+    if (@touch(APP_PATH . APP_BASE['session'] . 'sess_' . $session_id))
+      file_put_contents(APP_PATH . APP_BASE['session'] . 'sess_' . $session_id, sess_serialize(['created' => (isset($session['created']) ? $session['created'] : time()), 'last_access' => (isset($_SESSIONS[$session_id]['last_access']) ? $_SESSIONS[$session_id]['last_access'] : time()), 'user_id' => (!empty($_SESSIONS[$session_id]['user_id']) ? $_SESSIONS[$session_id]['user_id'] : 2) /* stage 2 */]), LOCK_EX); // 
+  }
+}
+
+foreach (glob(APP_BASE['session'] . 'sess_*') as $filename) {
+  $session = sess_unserialize(file_get_contents(APP_PATH . APP_BASE['session'] . basename($filename), true)); //array();
+  $session_id = substr(basename($filename), 5);
+  if (!empty($session)) {
+    if (!array_key_exists($session_id, $_SESSIONS)) {
+      if ((time() - (!isset($session['last_access'])?: $session['last_access'])) > SESSION_LIFETIME) {
+        //die((time() - (!isset($session['last_access'])?: $session['last_access'])) . ' is > than ' . SESSION_LIFETIME);
+        (!isset($_SESSIONS[$session_id])?: $_SESSIONS[$session_id]['status'] = 'inactive');
+        unset($_SESSIONS[$session_id]);
+        //array_map('unlink', [APP_PATH . APP_BASE['session'] . "sess_" . $session_id]);
+        continue;
+      }
+      $_SESSIONS[$session_id] = ['created' => (isset($session['created']) ? $session['created'] : time()), 'last_access' => (isset($session['last_access']) ? $session['last_access'] : time()), 'user_id' => 4, 'visitor_id' => '', 'status' => 'active', 'ip_addr' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']];
+    }
+  } else {
+    array_map('unlink', [APP_PATH . APP_BASE['session'] . "sess_" . $session_id]);
+    continue;
+  }
+
+  if (!in_array($session_id, array_keys($_SESSIONS)))
+    array_map('unlink', [APP_PATH . APP_BASE['session'] . "sess_" . $session_id]);
+  else {
+    $array = ['created' => (isset($session['created']) ? $session['created'] : time()), 'last_access' => (isset($session['last_access']) ? $session['last_access'] : time()), 'user_id' => 5 ]; // user_id error on logout | $_SESSIONS[$session_id]['user_id'] == '' $_SESSIONS[$session_id]['user_id']
+    //file_put_contents(APP_PATH . APP_BASE['session'] . basename($filename), sess_serialize($array), LOCK_EX);
+  }
+}
 
 if ( version_compare(phpversion(), '5.4.0', '>=') ) {
-  if (session_status() === PHP_SESSION_NONE) // PHP_SESSION_ACTIVE
-    session_start(['cookie_lifetime' => 86400, 'gc_maxlifetime' => 86400, 'cookie_secure' => true, 'cookie_httponly' => true]);
-} else if (session_id() === '')
-  session_start();
-//}
-// check active sessions
-// sesion_id
-//   sess_<mpi8vetfkctomau946o880rusc>
-// ip_addr[esses]
-// user_id
-// sessions.json
-
-
-/*
-  get a list of sessions <file> to update sessions.json
-*/
-//session_start();
-/*
-var_dump($_COOKIE["PHPSESSID"]);
-
-//$_SESSION['test'] = 'testing'; // 
-
-session_write_close();
-
-die(var_dump($_SESSION));
-*/
-$time = $_SERVER['REQUEST_TIME'];
-$ob_contents = NULL;
-
-if (!isset($_SESSION['last_access']))
-  $_SESSION['last_access'] = (!isset($_SERVER['REQUEST_TIME']) ? time() : $_SERVER['REQUEST_TIME']);
-
-if (isset($_SESSION['last_access']) && (time() - $_SESSION['last_access']) > SESSION_LIFETIME ) {
-  error_log('Client was (auto) logged out. $_SESSION["last_access"] = ' . $_SESSION["last_access"] . '   $time = ' . time() . '    == ' . (time() - $_SESSION['last_access']));
-  // some reason the session 's get clogged up ... clean them up
-  if (is_file(SESSION_SAVE_PATH . "sess_" . session_id()))
-    array_map('unlink', SESSION_SAVE_PATH . "sess_" . session_id());
-  else
-    array_map('unlink', glob(SESSION_SAVE_PATH . "sess_*")); 
-  //exit(header('Location: ' . APP_BASE_URL . '?session=logout')); // 
-} else {
-  if (ini_get('session.cookie_lifetime') !== 0) // Does this work?
-    setcookie(session_name(), session_id(), [
-      'expires' => time() + SESSION_LIFETIME,
-      'path' => '/', 
-      'domain' => $_SERVER['HTTP_HOST'],
-      'secure' => (!defined('APP_HTTPS') ? false : true),
-      'httponly' => true,
-      'samesite' => 'None'
-    ]);
-
-  ob_start();              // start output buffer 1
-  echo '<div style="float: right; text-align: right;">Session Lifetime: ' . (time() - $_SESSION['last_access']) . ' / ' . ini_get('session.gc_maxlifetime') . '<br />' . 'Cookie Lifetime: ' . session_get_cookie_params()['lifetime'] . ' / ' . ini_get('session.cookie_lifetime') . '<br />' . 'Session ID: sess_' . session_id() . '<pre>';
-  foreach ($_SESSION as $key => $value) {
-    if ($key == 'last_access') {
-      echo 'Date: ' . date('Y-m-d h:i:s', $value) . "\n"; 
-      echo '["' . $key . '"] => '; var_export($value); echo "\n";
-      continue;
-    }
-    echo '["' . $key . '"] => '; var_export($value); echo "\n";
-  }
-  echo '</pre></div>' . "\n";
-
-  $ob_contents = ob_get_contents(); // read ob2 ("b")
-  
-  ob_end_flush();          // flush ob2 to ob1
-  ob_end_clean();          // flush ob1 to browser
+  session_set_cookie_params(0, session_get_cookie_params()['path'], APP_DOMAIN, session_get_cookie_params()['secure'], session_get_cookie_params()['httponly']);
+  if (session_status() == PHP_SESSION_NONE) // PHP_SESSION_ACTIVE
+    session_start(['cookie_lifetime' => 0 /*delete on window close*/, 'gc_maxlifetime' => APP_TIMEOUT, 'cookie_secure' => defined('APP_HTTPS'), 'cookie_httponly' => true]); // <<
+  elseif (session_id() == '')
+    session_start();
 }
+
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+  if (empty($_SESSION['user_id'])) {
+    if (!empty($_SESSIONS[session_id()]['user_id'])) {
+      $_SESSION['user_id'] = $_SESSIONS[session_id()]['user_id'];
+    }
+  } elseif (is_numeric($_SESSION['user_id'])) {
+    //if ($_SESSIONS[session_id()]['user_id'] == '' || is_null($_SESSIONS[session_id()]['user_id']))
+    $_SESSION['user_id'] = $_SESSIONS[session_id()]['user_id'];
+    //$_SESSION['user_id'] = $_SESSIONS[session_id()]['user_id']
+  }
+}
+
+$_SESSIONS[$_COOKIE['PHPSESSID']] = array_replace($_SESSIONS[$_COOKIE['PHPSESSID']], SESSION);
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET')
+  $session_save();
+
+//!defined('APP_DEBUG') and define('APP_DEBUG', FALSE);
+
+if ((defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? TRUE : FALSE) : TRUE))
+  switch ($_SERVER['REQUEST_METHOD']) {
+    default:
+      if (key($_GET) == 'session')
+        if (in_array($_GET['session'], $_SESSIONS)) {
+          $_SESSIONS[session_id()]['patient_id'] = $_SESSIONS[$_GET['session']]['patient_id'];
+          $_SESSIONS[session_id()]['user_id'] = $_SESSIONS[$_GET['session']]['user_id'];
+        } else
+          exit(header('Location: ' . APP_URL_BASE . '?login'));
+      elseif (key($_GET) == 'login')
+        // $_SESSION['enable_ssl'] = (isset($_POST['enable_ssl']) ? true : (defined('APP_HTTPS') ? false : true));
+        if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) // $_SESSION['user_id'] >= 0     
+          exit(header('Location: ' . APP_URL_BASE));
+        else
+          exit(require APP_PATH . APP_BASE['public'] . 'login.php');
+
+      elseif (key($_GET) == 'logout')
+        if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) // $_SESSION['user_id'] >= 0
+          exit(require APP_PATH . APP_BASE['public'] . 'logout.php');
+        else
+          exit(header('Location: ' . APP_URL_BASE));
+      else {
+        !isset($_SESSION['created'])
+          and $_SESSION['created'] = (!isset($_SERVER['REQUEST_TIME']) ? time() : $_SERVER['REQUEST_TIME']);
+          
+        if ((!isset($_SESSION['last_access'])?: time() - $_SESSION['last_access']) > SESSION_LIFETIME)
+          if ($_SERVER['REQUEST_METHOD'] == "POST") break;
+
+        if (!isset($_SESSION['user_id']) || is_null($_SESSION['user_id']) || is_string($_SESSION['user_id'])) {
+          //$_SESSION['enable_ssl'] = false;
+          exit(header('Location: ' . APP_URL_BASE . '?login'));
+        //exit(header('Location: ' . APP_URL['scheme'] . '://' . APP_URL['host'] . APP_URL['path'] . '?login'));
+        //require '../src/session_login.php';
+        //require 'install.php';  // <<< SESSION Bug exists follow the trail ...
+        //header('Location: ' . APP_URL_BASE . '?login');
+        }
+      }
+      break;
+  }
+
+ob_start();              // start output buffer 1
+echo '<div style="float: right; text-align: right; font-size: 12px; margin: 10px;">Session Lifetime: ' . (time() - ($_SESSION['last_access'])) . ' / ' . ini_get('session.gc_maxlifetime') . '<br />' . 'Cookie Lifetime: ' . session_get_cookie_params()['lifetime'] . ' / ' . ini_get('session.cookie_lifetime') . '<br />' . 'Session ID: ' . (!empty(session_id()) ? session_id() : $_COOKIE["PHPSESSID"]);
 
 $_SESSION['last_access'] = (!isset($_SERVER['REQUEST_TIME']) ? time() : $_SERVER['REQUEST_TIME']);
 
-if (!isset($_SESSION['created']))
-    $_SESSION['created'] = (!isset($_SERVER['REQUEST_TIME']) ? time() : $_SERVER['REQUEST_TIME']);
-else if (time() - $_SESSION['created'] > 1800) {
-    // session started more than 30 minutes ago
-    session_regenerate_id(true);    // change session ID for the current session and invalidate old session ID
-    $_SESSION['created'] = time();  // update creation time
+echo '<pre>' . 'Date: ' . date('Y-m-d h:i:s', $_SESSION['last_access']) . "\n";
+foreach ($_SESSION as $key => $value) {
+  echo '["' . $key . '"] => '; var_export($value); echo "\n";
 }
+echo '</pre></div>' . "\n";
+  
+$ob_contents = NULL;
 
-    
-// die(var_dump($_SESSION));
-
-// session_gc();
-if (!is_dir(SESSION_SAVE_PATH))
-  mkdir(SESSION_SAVE_PATH);
-
-if (!is_file(SESSION_SAVE_PATH . 'sessions.json')) touch(SESSION_SAVE_PATH . 'sessions.json');
-$json = file_get_contents(SESSION_SAVE_PATH . 'sessions.json', true);
-$json_decode = json_decode($json, true);
-
-$files = glob(SESSION_SAVE_PATH . 'sess_*');
-
-foreach($files as $key => $file) {
-  //$files = (array) [ltrim(basename($file), 'sess_')];
-  unset($files[$key]);
-  $key = ltrim(basename($file), 'sess_');
-  if ($key == session_id())
-    $files[$key] = (array) [
-      'user_id' => (isset($_SESSION['user_id']) ? ($_SESSION['user_id'] == 0 ? $_SESSION['user_id'] : $_SESSION['user_id']) : NULL),
-      'visitor_id' => (isset($_SESSION['visitor_id']) ? $_SESSION['visitor_id'] : NULL),
-      'ip_addr' => $_SERVER['REMOTE_ADDR'],
-      'browser' => $_SERVER['HTTP_USER_AGENT']
-    ];
-  else
-    if (isset($json_decode[$key])) $files[$key] = $json_decode[$key];
-}
-
-file_put_contents(SESSION_SAVE_PATH . 'sessions.json', json_encode($files), LOCK_EX);
-
-
-switch ($_SERVER['REQUEST_METHOD']) {
-  default:
-    //session_write_close();
-    if (key($_GET) == 'session') {
-      switch ($_GET['session']) {
-        case 'login':
-          if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
-            exit(header('Location: ' . APP_URL_BASE));
-          else
-            require APP_PATH . 'src/session_login.php';
-        break;
-        case 'logout':
-          if (isset($_SESSION['user_id']) && $_SESSION['user_id'] >= 0)
-            require 'src/session_logout.php';
-          else
-            exit(header('Location: ' . APP_URL_BASE));
-        break;
-        default:
-          exit(header('Location: ' . APP_URL_BASE . '?session=login'));
-        break;
-      }
-      exit(); 
-    }
-    if ( !isset($_SESSION['user_id']) || $_SESSION['user_id'] === NULL ) {
-      //die(var_dump($_SESSION));
-
-      exit(header('Location: ' . APP_URL_BASE . '?session=login'));
-      //require '../src/session_login.php';
-      //require 'install.php';  // <<< SESSION Bug exists follow the trail ...
-      //header('Location: ' . APP_URL_BASE . '?session');
-    }
-    break;
-}
+$ob_contents = ob_get_contents(); // read ob2 ("b")
+  
+ob_end_flush();          // flush ob2 to ob1
+ob_end_clean();          // flush ob1 to browser

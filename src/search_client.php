@@ -266,7 +266,7 @@ HERE); // ORDER BY sort, hamper_no,
         $date = date('d-m-y-'.substr((string)microtime(), 1, 8));
         $date = str_replace(".", "", $date);
         $filename = "export_".$date.".xlsx";
-        $filePath = APP_PATH . APP_EXPORT . $filename; //make sure you set the right permissions and change this to the path you want
+        $filePath = APP_PATH . APP_BASE['export'] . $filename; //make sure you set the right permissions and change this to the path you want
 
         //$writer = new Xlsx($spreadsheet);
         //$writer->save('hello_world.xlsx');

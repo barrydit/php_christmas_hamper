@@ -3,32 +3,36 @@ if (count(get_included_files()) == ((version_compare(PHP_VERSION, '5.0.0', '>=')
   exit('Direct access is not allowed.');
 endif;
 
-require_once 'functions.php';
-
-// https://code.tutsplus.com/tutorials/organize-your-next-php-project-the-right-way--net-5873
-
-// require_once(substr(__FILE__, 0, (strpos(__FILE__, 'lib/')))."resources.php");
-// defined("LIBRARY_PATH") or define("LIBRARY_PATH", realpath(dirname(__FILE__) . '/library'));
-// defined("TEMPLATES_PATH") or define("TEMPLATES_PATH", realpath(dirname(__FILE__) . '/templates'));
+error_reporting(E_STRICT | E_ALL);
 
 date_default_timezone_set('America/Vancouver');
 
+// Enable output buffering
+//ini_set('output_buffering', 'On');
+
+// Increase the maximum execution time to 60 seconds
+//ini_set('max_execution_time', 60);
+
+/* This code sets up some basic configuration constants for a PHP application. */
 isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] == 'on'
   and define('APP_HTTPS', TRUE);
 
+// Application configuration
+define('APP_START',     microtime(true));
 define('APP_NAME',      'Christmas Hamper ' . date('Y'));
+/* This code defines a constant named APP_DOMAIN that represents the domain name of the current website. */
+(isset($_GET['debug']) ? define('APP_DEBUG', TRUE) : NULL);
 define('APP_DOMAIN',    isset($_SERVER['HTTP_HOST']) === true ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
 define('APP_VERSION',   number_format(1.0, 1) . '.1');
-define('APP_TIMEOUT',   strtotime('1970-01-01 24:00:00'.'GMT'));
-define('APP_START',     microtime(true));
+define('APP_TIMEOUT',   strtotime('1970-01-01 08:00:00'.'GMT'));
 define('APP_UNAME',     '');
 define('APP_PWORD',     '');
 
 preg_match('/^(\/home\/\w+\/).+$/', dirname(__DIR__, 1), $matches)
   and define('APP_HOME', $matches[1]);
 
-// absolute pathname 
-basename(__DIR__) == 'config' ?
+/* This code sets up constants that define the application's base path and directory structure, and ensures that the application is able to access files and directories located in the parent directory. */
+(basename(__DIR__) == 'config') ?
   define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR)
   . chdir('../')
   . define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
@@ -43,34 +47,38 @@ basename(__DIR__) == 'config' ?
   define('APP_PATH', __DIR__ . DIRECTORY_SEPARATOR); // /var/www/html/
 
 //ini_set("include_path", "src");
+ini_set('error_log', APP_PATH . 'error_log');
 ini_set('log_errors', 1);
-ini_set('error_log', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'error_log'); // APP_PATH . 'error_log'
-error_reporting(E_STRICT | E_ALL);
 
-!is_file((!empty(get_included_files()) ? get_included_files()[0] : __FILE__))
-  or define('APP_SELF', (!empty(get_included_files()) ? get_included_files()[0] : __FILE__)); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
-
-if (!isset($_SERVER['REQUEST_URI']))  {
-  $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 0);
-
-  if (isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] != "")
-    $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
-}
-
-if (APP_DOMAIN != 'localhost')
+(defined('APP_DOMAIN') && APP_DOMAIN != 'localhost') ?
+// This code sets the APP_ENV constant to 'production' and creates a file named .env.production in the application directory if it doesn't already exist.
+  // The file is used to store configuration settings for the production environment
   (!is_file(APP_PATH.'.env.production') ? 
     (!@touch(APP_PATH.'.env.production') ? define('APP_ENV', 'production') : define('APP_ENV', 'production') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=\nDB_PWORD=")) :
     define('APP_ENV', 'production')
-  );
-else
+  ) :
+  // The file is used to store configuration settings for the development environment
   (!is_file(APP_PATH.'.env.development') ?
     (!@touch(APP_PATH.'.env.development') ? define('APP_ENV', 'development') : define('APP_ENV', 'development') . file_put_contents(APP_PATH.'.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=")) :
-      define('APP_ENV', 'development')
+    define('APP_ENV', 'development')
   );
 
+/* This code checks if the current file is being executed directly (i.e. as the main script) or if it has been included by another file. */
+!is_file((!empty(get_included_files()) ? get_included_files()[0] : __FILE__))
+  or define('APP_SELF', (!empty(get_included_files()) ? get_included_files()[0] : __FILE__)); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
+
+/* The purpose of this code is to ensure that $_SERVER['REQUEST_URI'] is set with the correct value, which can be used by the application to determine the requested URL and any parameters passed to it. */
+
+!isset($_SERVER['REQUEST_URI'])
+  and $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 0) . ((isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] != "") AND '?' . $_SERVER['QUERY_STRING']);
+
+
 // substr( str_replace('\\', '/', __FILE__), strlen($_SERVER['DOCUMENT_ROOT']), strrpos(str_replace('\\', '/', __FILE__), '/') - strlen($_SERVER['DOCUMENT_ROOT']) + 1 )
-substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) == '/' ? // $_SERVER['DOCUMENT_ROOT']
-  define('APP_URL', 'http' . (defined('APP_HTTPS') ? 's':'') . '://' . APP_DOMAIN . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1)) :
+/* This code checks if the first part of the URI is equal to a single slash (/). If it is, this means that the script is being accessed at the root level of the domain,
+and not within a specific directory. If it isn't, this means that the script is being accessed within a directory. */
+!is_array(APP_BASE) ?
+  substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) == '/' // $_SERVER['DOCUMENT_ROOT']
+    and define('APP_URL', 'http' . (defined('APP_HTTPS') ? 's':'') . '://' . APP_DOMAIN . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1)) :
   define('APP_URL', [
     'scheme' => 'http' . (defined('APP_HTTPS') ? 's':''), // ($_SERVER['HTTPS'] == 'on', (isset($_SERVER['HTTPS']) === true ? 'https' : 'http')
     'host' => (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']),
@@ -85,9 +93,9 @@ substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) ==
 // APP_BASE_URL
 !is_array(APP_URL) ? define('APP_URL_BASE', APP_URL) :
   define('APP_URL_BASE', APP_URL['scheme'] . '://' . APP_URL['host'] . APP_URL['path']);
-  
+
 // APP_BASE_URI
-define('APP_URL_PATH', (!is_array(APP_URL) ? substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) : APP_URL['path'])  );
+define('APP_URL_PATH', (!is_array(APP_URL) ? substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1) : APP_URL['path']));
 
 define('APP_QUERY', (!empty(parse_url($_SERVER['REQUEST_URI'])['query']) ? (parse_str(parse_url($_SERVER['REQUEST_URI'])['query'], $query) ? [] : $query) : []));
 
@@ -100,48 +108,6 @@ define('APP_QUERY', (!empty(parse_url($_SERVER['REQUEST_URI'])['query']) ? (pars
       )
     )
   );
-/*
-switch(get_included_files()[0]) {
-  case APP_PATH . 'assets' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'jquery.tinymce-config.js.php':
-
-  break;
-
-  case APP_PATH . 'index.php':
-
-  break;
-
-  case APP_PATH . 'install.php':
-
-  break;
-
-  case APP_PATH . 'login.php':
-
-  break;
-  
-  case APP_PATH . 'logout.php':
-
-  break;
-
-  default:
-  
-    //var_dump(get_included_files());
-    //header('Location: ' . APP_BASE_URL);
-    //exit;
-    
-  break;
-}
-*/
-//die('hello world');
-//if (basename(get_included_files()[0]) == 'jquery.tinymce-config.js.php') {
-  //exit;
-//} else if (basename($_SERVER["SCRIPT_FILENAME"]) !== 'index.php') {
-//  header('Location: ' . APP_BASE_URL . basename($_SERVER["SCRIPT_FILENAME"]));
-//  exit;
-//}
-
-//var_dump($_REQUEST);
-
-//$str_1 = htmlentities($_REQUEST['history']);
 
 /*
 function shutdown()
@@ -157,13 +123,28 @@ function shutdown()
 
 register_shutdown_function( // 'shutdown'
   function() {
+    global $pdo, $session_save;
+
+    isset($session_save) and $session_save();
+
     defined('APP_END') or define('APP_END', microtime(true));
-    //print_r(get_defined_constants(true)['user']);
     //include('checksum_md5.php'); // your_logger(get_included_files());
     unset($pdo);
   }
 );
 
+$includeFiles = glob(dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . '*.php');
 
-//die();
+foreach($includeFiles as $includeFile) {
+  if ($includeFile == realpath('config' . DIRECTORY_SEPARATOR . 'composer.php'))
+    if (defined('APP_ENV') && APP_ENV != 'development') continue;
 
+  if ($includeFile == realpath('config' . DIRECTORY_SEPARATOR . 'install.php')) continue;
+    
+  if (in_array($includeFile, get_required_files())) continue; // $includeFile == __FILE__
+  if (!file_exists($includeFile)) {
+    error_log("Failed to load a necessary file: " . $includeFile . PHP_EOL); //exit(1);
+    break;
+  }
+  require $includeFile;
+}

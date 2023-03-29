@@ -14,6 +14,17 @@ $dbtables = array(
   'hampers'
 );
 */
+/**/
+
+require_once(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
+
+$dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.' . APP_ENV);
+$dotenv->safeLoad();
+
+if (empty($_ENV)) {
+  $_ENV['DB_UNAME'] = 'root';
+  $_ENV['DB_PWORD'] = '';
+}
 
 define('DB_HOST', 'localhost');
 define('DB_CHARSET', 'utf8mb4');
@@ -124,4 +135,3 @@ foreach(DB_TABLES as $key => $table) {
     exit;
   }
 }
-

@@ -220,7 +220,7 @@ td {
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search">Search</a> &#11106; <a href="?search=clients">Clients</a> : <a href="?search=hampers">Hampers</a>
-        <form action="<?=APP_BASE_URI . '?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+        <form action method="GET" autocomplete="off" style="display: inline; float: right;">
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </h3>
@@ -231,7 +231,7 @@ td {
   </div>
 
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
-    <form method="POST" action="<?=APP_BASE_URL . '?' . 'search=clients'?>" autocomplete="off">
+    <form method="POST" action="<?='?search=clients'; ?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -350,7 +350,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ) )?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ) )?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

@@ -1,6 +1,12 @@
 <?php
 
 /**
+This function takes in two parameters: $base and $path, which represent the base path and the path to be made relative, respectively.
+
+It first detects the directory separator used in the base path, then splits both paths into arrays using that separator. It then removes the common base elements from the beginning of the path array, leaving only the difference.
+
+Finally, it returns the relative path by joining the remaining elements in the path array using the separator detected earlier, with the separator prepended to the resulting string.
+
 * Return a relative path to a file or directory using base directory. 
 * When you set $base to /website and $path to /website/store/library.php
 * this function will return /store/library.php
@@ -66,35 +72,56 @@ function files_identical($fn1, $fn2) {
     return $same;
 }
 
+/*
+ * https://stackoverflow.com/questions/1735252/php-countdown-to-date
+*/
+
+function countdown($time, $up = true, $h = true, $m = true, $s = true) {
+  $rem = ($up == true) ? time() - $time : $time - time();
+  $day = floor($rem / 86400);
+  $hr = floor(($rem % 86400) / 3600);
+  $min = floor(($rem % 3600) / 60);
+  $sec = ($rem % 60);
+
+  if ( $day && !$h )
+    if ( $hr > 12 ) $day++; // round up if not displaying hours
+
+  $ret = Array();
+  if ( $day && $h ) $ret[] = ($day ? $day ." day".($day==1?"":"s") : "");
+  if ( $day && !$h ) $ret[] = ($day ? $day . " day" . ($day == 1 ? "" : "s") : "");
+  if ( $hr && $h ) $ret[] = ($hr ? $hr ." hr" . ($hr==1?"":"s") : "");
+  if ( $min && $m && $h ) $ret[] = ($min ? $min ." min". ($min==1?"":"s") : "");
+  if ( $sec && $s && $m && $h ) $ret[] = ($sec ? $sec ." sec".($sec==1?"":"s") : "");
+
+  $last = end($ret);
+  array_pop($ret);
+  $string = join(", ", $ret) . (count($ret) < 1? '' : ' and ') . $last;
+
+  return $string;
+}
+
 // Snippet from PHP Share: http://www.phpshare.org
 
 function formatSizeUnits($bytes)
 {
   if ($bytes >= 1073741824)
-  {
     $bytes = number_format($bytes / 1073741824, 2) . ' GB';
-  }
   elseif ($bytes >= 1048576)
-  {
     $bytes = number_format($bytes / 1048576, 2) . ' MB';
-  }
   elseif ($bytes >= 1024)
-  {
     $bytes = number_format($bytes / 1024, 2) . ' KB';
-  }
   elseif ($bytes > 1)
-  {
     $bytes = $bytes . ' bytes';
-  }
   elseif ($bytes == 1)
-  {
     $bytes = $bytes . ' byte';
-  }
   else
-  {
     $bytes = '0 bytes';
-  }
   return $bytes;
+}
+
+function convertToBytes($value) {
+    $unit = strtolower(substr($value, -1, 1));
+    return (int) $value * pow(1024, array_search($unit, array(1 =>'k','m','g')));
 }
 
 /**
@@ -107,52 +134,54 @@ function formatSizeUnits($bytes)
 */
 function FileSizeConvert($bytes)
 {
-    $bytes = floatval($bytes);
-        $arBytes = array(
-            0 => array(
-                "UNIT" => "TB",
-                "VALUE" => pow(1024, 4)
-            ),
-            1 => array(
-                "UNIT" => "GB",
-                "VALUE" => pow(1024, 3)
-            ),
-            2 => array(
-                "UNIT" => "MB",
-                "VALUE" => pow(1024, 2)
-            ),
-            3 => array(
-                "UNIT" => "KB",
-                "VALUE" => 1024
-            ),
-            4 => array(
-                "UNIT" => "B",
-                "VALUE" => 1
-            ),
-        );
+  $bytes = floatval($bytes);
+  $arBytes = array(
+    0 => array(
+      "UNIT" => "TB",
+      "VALUE" => pow(1024, 4)
+    ),
+    1 => array(
+      "UNIT" => "GB",
+      "VALUE" => pow(1024, 3)
+    ),
+    2 => array(
+      "UNIT" => "MB",
+      "VALUE" => pow(1024, 2)
+    ),
+    3 => array(
+      "UNIT" => "KB",
+      "VALUE" => 1024
+    ),
+    4 => array(
+      "UNIT" => "B",
+      "VALUE" => 1
+    ),
+  );
 
-    foreach($arBytes as $arItem)
+  foreach($arBytes as $arItem)
+  {
+    if($bytes >= $arItem["VALUE"])
     {
-        if($bytes >= $arItem["VALUE"])
-        {
-            $result = $bytes / $arItem["VALUE"];
-            $result = str_replace(".", "," , strval(round($result, 2)))." ".$arItem["UNIT"];
-            break;
-        }
+      $result = $bytes / $arItem["VALUE"];
+      $result = str_replace(".", "," , strval(round($result, 2)))." ".$arItem["UNIT"];
+      break;
     }
-    return $result;
+  }
+  return $result;
 }
 
-function getAge($date) {
-	$from = new DateTime($date);
-    $to   = new DateTime('today');
+function getAge($date)
+{
+  $from = ($date == '0000-00-00') ? new DateTime() : new DateTime($date);
+  $to   = new DateTime('today');
 
-	return intval($from->diff($to)->y);
-	//return intval(date('Y', time() - strtotime($date))) - 1970;
-	//return intval(date("Y") - date("Y", strtotime($date))); 
+  return intval($from->diff($to)->y);
+  //return intval(date('Y', time() - strtotime($date))) - 1970;
+  //return intval(date("Y") - date("Y", strtotime($date))); 
 }
 
-function split_name($name) {
+function split_name($name)
+{
     $name = trim($name);
     $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
     $first_name = trim( preg_replace('#'.$last_name.'#', '', $name ) );
@@ -167,6 +196,6 @@ function split_name($name) {
 function phpdate($format="Y-m-d")
 {
   ob_start(); phpinfo(1);
-  if(preg_match('~Build Date (?:=> )?\K.*~', strip_tags(ob_get_clean()), $out))
+  if (preg_match('~Build Date (?:=> )?\K.*~', strip_tags(ob_get_clean()), $out))
     return date($format, strtotime($out[0]));
 }

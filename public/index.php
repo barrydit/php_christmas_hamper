@@ -5,87 +5,6 @@ defined('APP_BASE_PATH') // $_SERVER['DOCUMENT_ROOT']
 
 require(APP_BASE_PATH . 'config/config.php');
 
-if (defined('APP_ENV') && APP_ENV == 'development') {
-// https://stackoverflow.com/questions/38396046/how-to-run-composer-update-on-php-server
-
-  define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
-  define('COMPOSER_INITED', file_exists(APP_BASE_PATH . 'vendor'));
-
-  set_time_limit(100);
-  ini_set('memory_limit',-1);
-
-  if (!getenv('HOME') && !getenv('COMPOSER_HOME')) {
-    putenv("COMPOSER_HOME=".HOME_DIRECTORY);
-  }
-
-  ini_set('phar.readonly',0);
-  if (!file_exists('composer')) {
-    if (!is_file(APP_BASE_PATH . 'composer.phar'))
-      file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
-    (new Phar("composer.phar"))->extractTo("./composer");
-  }
-
-  //This requires the phar to have been extracted successfully.
-  require_once ('composer/vendor/autoload.php');
-}
-
-//Use the Composer classes
-//use Composer\Console\Application;
-//use Composer\Command\UpdateCommand;
-//use Symfony\Component\Console\Input\ArrayInput;
-
-if (defined('APP_ENV') && APP_ENV == 'development') {
-  defined('COMPOSER_AUTOLOAD_PATH')
-    or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
-
-  if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
-
-  //chdir();
-  //shell_exec("cd ../ && php -f composer.phar", $output, $worked); // --dry-run --no-interaction --ansi
-  // config --global --auth github-oauth.github.com ghp_1XhQL4hgdghjjyuuyyuTfux51ZDHZz
-
-//Create the commands
-//$args = array('command' => 'self-update');
-  $args = array('command' => 'update');
-//$args = array('command' => 'config');
-
-    if(!file_exists('vendor')) { 
-      echo "This is first composer run: --no-scripts option is applies\n";
-      $args['--no-scripts'] = true;   
-    //$args['--global'] = NULL;
-    //$args['--editor'] = true;
-    //$args['--auth'] = [ "github-oauth" => [ "github.com" => "ghp_1XhQL4LghjghjghfjhlXqTfux51ZDHZz" ] ] ;
-    //$args['--unset'] = [ "github-oauth" => [ "github.com" => "ghp_1XhQL4LWTl3KtyJmmWlIjfghjfghjfufgh" ] ] ;
-    //$args['github-oauth.github.com'] = 'ghp_1XhQLfhgjgfjhghjghjux51ZDHZz';   
-    }
-    $input = new ArrayInput($args);
-
-//Create the application and run it with the commands
-    $application = new Application();
-    $application->setAutoExit(false);
-    $application->setCatchExceptions(false);
-    try {
-    //Running commdand php.ini allow_url_fopen=1 && proc_open() function available
-      $application->run($input);
-      echo 'Success';
-    } catch (\Exception $e) {
-      echo 'Error: '.$e->getMessage()."\n";
-    }
-/*
-  die(var_dump(shell_exec("cd ../ && php -f composer.phar")));
-  //die(var_dump(shell_exec('composer config --global --auth github-oauth.github.com ghp_1XhQL4LWTl3Kghjfghjfghjjgfgh')));
-  $empty1=array();
-  $empty2=array();
-  $proc=proc_open('php composer.phar config --global --auth github-oauth.github.com ghp_1XhQLhgjghjghjghjghjHZz',$empty1,$empty2 );
-  $ret = proc_close($proc);
-  
-  die(var_dump(passthru('php composer.phar config --global --auth github-oauth.github.com ghp_1XbnmbnmbnmbnmqTfux51ZDHZz')));
-  exec('php composer.phar update --no-interaction --quiet 2>&1', $output, $worked); // self-update
-*/
-    die(header('Location: http://' . APP_URL_BASE));
-  }
-} //else 
-
 require(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'); // composer dump -o
 
 switch($_SERVER['SERVER_NAME']) {
@@ -94,16 +13,9 @@ switch($_SERVER['SERVER_NAME']) {
       //exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE ))); // basename($_SERVER['REQUEST_URI']));
     endif;
     if ($_SERVER['SERVER_NAME'] == 'localhost') {
-      if (!is_file(APP_BASE_PATH . '.env.' . APP_ENV))
-        file_put_contents(APP_BASE_PATH . '.env.' . APP_ENV, "DB_UNAME=root\nDB_PWORD=");
+
     }
-    //if(class_exists('Dotenv')) {
-      $dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.' . APP_ENV);
-      $dotenv->safeLoad();
-    if (empty($_ENV)) {
-      $_ENV['DB_UNAME'] = 'root';
-      $_ENV['DB_PWORD'] = '';
-    }
+
     break;
     
   default:
@@ -111,19 +23,6 @@ switch($_SERVER['SERVER_NAME']) {
       exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE . $_SERVER['QUERY_STRING'])));
     endif;
     break;
-}
-
-$includeFiles = [
-  APP_BASE_PATH . 'config/database.php',
-  APP_BASE_PATH . 'config/session.php'
-];
-
-foreach($includeFiles as $includeFile) {
-  if (!file_exists($includeFile)) {
-    echo "Failed to load a necessary file: " . $includeFile . PHP_EOL;
-    exit(1); //break;
-  }
-  require $includeFile;
 }
 
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -140,17 +39,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
       if ($setting['del_prev_annual_hamper']) {
       
       /*
-        Look for 1 hamper, at the bottom of the list, where the YEAR(`createed_date`) is less than date('Y')
+        Look for 1 hamper, where the YEAR(`createed_date`) is less than date('Y') aka CURR_YEAR
 
-          If found, look for 1 hamper, at the bottom of the list, where the YEAR(`created_date`) is equal to this year
+          If found, look for 1 hamper, where the YEAR(`created_date`) is equal to this date('Y') aka CURR_YEAR
 
-          [Cancels/Requires] having multiple years (current year, and before) at the same time, before they are deleted.
-
-
-
+          [Cancels/Requires] in having multiple years (current year, and < date('Y')) at the same time, before they are deleted.
       */
       
-        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
+        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date LIMIT 1;');
         $stmt->execute(array(
           ":date" => date('Y')
         ));
@@ -158,8 +54,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!empty($row)) {
-        
-          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC LIMIT 1;');
+          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
           $stmt->execute(array(
             ":date" => date('Y')
           ));
@@ -167,21 +62,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
           $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
           if (!empty($row)) {
-            $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC;');
+            $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
             $stmt->execute(array(
               ":date" => date('Y')
             ));
-        
-            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
-              $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-              $stmt->execute(array(
-                ":date" => date('Y')
-              ));
-            }
           }
         }
-      
-        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC LIMIT 1;');
+        
+        /*
+          Look for 1 Hamper WHERE YEAR(created_date) = CURR_YEAR
+          
+        */
+
+        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
         $stmt->execute(array(
           ":date" => date('Y')
         ));
@@ -263,7 +156,8 @@ FROM clients
 WHERE last_name != ''
 GROUP BY last_name
 HAVING COUNT(last_name) > 1;
-HERE);
+HERE
+);
     $stmt->execute(array());
     
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
@@ -306,43 +200,43 @@ HERE);
     $client_dup_count = count($rows_clients);
 
     if (key($_GET) == '')
-      require APP_PATH . '/src/index.php';
+      require APP_PATH . APP_BASE['src'] . 'index.php';
     elseif (key($_GET) == 'search')
       if (current($_GET) == 'clients')
-        require APP_PATH . '/src/search_client.php';
+        require APP_PATH . APP_BASE['src'] . 'search_client.php';
       elseif (current($_GET) == 'hampers')
-        require APP_PATH . '/src/search_hamper.php';
+        require APP_PATH . APP_BASE['src'] . 'search_hamper.php';
       else
         exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'client')
       if (current($_GET) == 'entry' || empty(current($_GET)))
-        require APP_PATH . '/src/entry_client.php';
+        require APP_PATH . APP_BASE['src'] . 'entry_client.php';
       elseif (current($_GET) == 'children')
-        require APP_PATH . '/src/client_children.php';
+        require APP_PATH . APP_BASE['src'] . 'client_children.php';
       elseif (current($_GET) == 'duplicate')
-        require APP_PATH . '/src/client_duplicate.php';
+        require APP_PATH . APP_BASE['src'] . 'client_duplicate.php';
       elseif ((int) current($_GET))
-        require APP_PATH . '/src/entry_client.php';
+        require APP_PATH . APP_BASE['src'] . 'entry_client.php';
       else
         exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'hamper')
       if (current($_GET) == 'entry' || empty(current($_GET)))
-        require APP_PATH . '/src/entry_hamper.php';
+        require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
       elseif ((int) current($_GET))
-        require APP_PATH . '/src/entry_hamper.php';
+        require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
       else
         exit(header('Location: ' . APP_URL_BASE));
     elseif (key($_GET) == 'reports') {
       if (current($_GET) == '' || !empty(current($_GET))) {
-        require APP_PATH . '/src/reports.php';
+        require APP_PATH . APP_BASE['src'] . 'reports.php';
       }
     } elseif (key($_GET) == 'queue') {
       if (current($_GET) == '' || !empty(current($_GET))) {
-        require APP_PATH . '/src/queue.php';
+        require APP_PATH . APP_BASE['src'] . 'queue.php';
       }
     }
     elseif (key($_GET) == 'debug')
-      require APP_PATH . '/src/debug.php';  
+      require APP_PATH . APP_BASE['src'] . 'debug.php';  
 /*
     elseif (key($_GET) == 'import') {
       if (current($_GET) == 'csv') {

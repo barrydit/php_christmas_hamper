@@ -380,7 +380,7 @@ td {
 <body>
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
-      <form action="<?=APP_URL_PATH . '?'?>" autocomplete="off" method="GET">
+      <form action autocomplete="off" method="GET">
         <h3>
           <a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search=clients" style="text-decoration: none;">Client</a> &#11106;
           <span style="font-weight: normal;"><?=(!empty($row_client)) ? $row_client['last_name'] . ', ' . $row_client['first_name'] : '(<i>New Client</i>)' ?></span>
@@ -394,14 +394,14 @@ td {
   </div>
 
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form id="full_name_frm" name="client_search" method="POST" action="<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" name="client_search" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
         </div> -->
         <div style="display: table-cell; text-align: left; padding-left: 10px;">
           <label>Last Name:&nbsp;&nbsp;
-            <input id="full_name" type="text" name="q" list="full_names" pattern="[a-zA-Z\W+]{1,64}" placeholder=""  value="" autofocus=""  oninput="full_name_input()" /> <!-- onclick="this.form.submit();" -->
+            <input id="full_name" type="text" name="q" list="full_names" pattern="[a-zA-Z\W+]{1,64}" placeholder=""  value="" oninput="full_name_input()" /> <!-- onclick="this.form.submit();" -->
           </label>
           <datalist id="full_names">
             <option value="" />
@@ -416,7 +416,7 @@ td {
 
   <div class="overflowAuto" style="border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px;">
 <!-- hamper_id  last_name  first_name  phone_number_1  address  group_size  occupants  special_diet  active_status  modified_date 	created_date -->
-    <form name="client_entry" action="<?=APP_URL_PATH . '?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
+    <form name="client_entry" action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
       <input type="hidden" name="hamper_year" value="<?=date('Y')?>" />
       <input type="hidden" name="client_id" value="<?=(!empty($row_client['id']) ? $row_client['id'] : '') ?>" />
 <?php if (!empty($row_client['hamper_id']) && is_int((int) $row_client['hamper_id'])) { ?>

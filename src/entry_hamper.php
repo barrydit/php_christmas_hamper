@@ -12,7 +12,7 @@ if (isset($_REQUEST['hamper']))
       if (!empty($row))
         $_SESSION['hamper_id'] = $_REQUEST['hamper'] = filter_var($_REQUEST['hamper'], FILTER_VALIDATE_INT);
       else 
-        exit(header('Location: ' . APP_BASE_URL . '?' . http_build_query(array())));
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array())));
     }
   else
     $_SESSION['hamper_id'] = intval($_REQUEST['hamper']);
@@ -37,7 +37,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
           ":hamper_id" => $_POST["hamper_id"]
         ));
 
-        exit(header('Location: ' . APP_BASE_URL . '?' . http_build_query(array(
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
           'hamper' => $_POST['hamper_id']
         ))));
 
@@ -53,7 +53,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       ));
     }
     
-    exit(header('Location: ' . APP_BASE_URL . '?' . http_build_query(array(
+    exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
       'hamper' => $_SESSION['hamper_id']
     ))));
     break;
@@ -124,7 +124,7 @@ td {
 <body>  
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
-      <form action="<?=APP_BASE_URI . '?'?>" autocomplete="off" method="GET">
+      <form action autocomplete="off" method="GET">
         <h3>
           <a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search=hampers" style="text-decoration: none;">Hamper</a> &#11106;
           <span style="font-weight: normal;">[ <?=(!empty($row_hamper)) ? $row_hamper['hamper_no'] : '<i>New Hamper</i>' ?> ]</span>
@@ -137,7 +137,7 @@ td {
   </div>
   
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form method="POST" action="<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -158,7 +158,7 @@ td {
 
   <div class="overflowAuto" style="border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px;">
     <div style="padding: 0px 20px 10px 20px;">
-      <form action="<?=APP_BASE_URI . '?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
+      <form action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
 <?php if (!empty($row_hamper['id']) && is_int((int) $row_hamper['id'])) { ?>
         <input type="hidden" name="hamper_id" value="<?=(!empty($row_hamper['id']) ? $row_hamper['id'] : '') ?>" />
 <?php } ?>
@@ -276,7 +276,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_BASE_URL . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

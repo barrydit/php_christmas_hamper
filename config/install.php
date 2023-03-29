@@ -1,5 +1,7 @@
 <?php
 
+require_once('config.php');
+require_once('functions.php');
 /*
 $ob_contents = null;
 try {
@@ -19,16 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute(array(
       ":date" => date('Y')
     ));
-        
+  
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!empty($row)) {
-    
+
       $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC;');
       $stmt->execute(array(
         ":date" => date('Y')
       ));
-  
+
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
         $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE `id` = :client_id AND `hamper_id` = :hamper_id ;');
         $stmt->execute(array(
@@ -36,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           ":hamper_id" => $row['id']
         ));
       }
-          
+
       $stmt = $pdo->prepare('SELECT `id`, `client_id`, YEAR(`created_date`) FROM `hampers` WHERE YEAR(`created_date`) >= :date ORDER BY `id` DESC LIMIT 1;');
       $stmt->execute(array(
         ":date" => date('Y')
       ));
-          
+
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
-          
+
       if (!empty($row)) {
         $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
         $stmt->execute(array(
@@ -89,9 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 switch ($_SERVER['REQUEST_METHOD']) {
   default:
-
     if (key($_GET) == 'db') {
-      
       switch ($_GET['db']) {
         case '':
           //if (!$ob_contents) header('Location: ' . APP_URL_BASE . '?session');

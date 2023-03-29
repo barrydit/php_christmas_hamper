@@ -6,16 +6,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 */
-$json = file_get_contents(SESSION_SAVE_PATH . 'sessions.json', true);
+$json = file_get_contents(SESSION_SAVE_PATH . '/sessions.json', true);
 $json_decode = json_decode($json, true);
 
 $visitor_count = 0;
 $user_count = 0;
-
+/*
 foreach($json_decode as $key => $file) {
   if (!empty($file['user_id']) || is_numeric($file['user_id'])) $user_count++;
   elseif (!empty($file['visitor_id']) || is_numeric($file['visitor_id'])) $visitor_count++;
 }
+*/
 ?>
 <!DOCTYPE html>
 <html>
