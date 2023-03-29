@@ -147,8 +147,8 @@ HTML;
   //echo '<div style="display: inline-block; float: right; text-align: right;">'
   //. '  <em style="font-size: 13px;">Source (code): [<b>' .formatSizeUnits($total_filesize) . '</b>]  [<b>'. $total_files . '</b> files]  [<b>' . ($total_lines + $sql_lines) . '</b> lines]</em>'
   //. '</div>';
-  echo '<div id="chartContainer" style="height: 195px; width: 100%;"></div>' . "\n";
-  //echo '<div id="chartContainer2" style="height: 195px; display: inline-block; width: 48%;"></div>' . "\n";
+  echo '<div id="chartContainer" style="height: 195px; display: inline-block; width: 48%;"></div>' . "\n";
+  echo '<div id="chartContainer2" style="height: 195px; display: inline-block; width: 48%;"></div>' . "\n";
   echo '<pre style="font-size: 12px;">' . "\n";
   // print_r(get_defined_constants(true)['user']);
   echo '</pre>' . "\n";
