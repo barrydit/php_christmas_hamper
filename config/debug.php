@@ -144,9 +144,9 @@ SCRIPT;
 HTML;
   defined('APP_END') or define('APP_END', microtime(true));
   echo '<div style="display: inline-block;" title="APP_START - APP_END"><em>Execution time: <b>'  . round(APP_END - APP_START, 6) . '</b> secs ' . "<br />\n" . 'Mem: ' . formatSizeUnits(memory_get_usage()) . "<br />\n" . ' Max: ' . formatSizeUnits(convertToBytes(ini_get('memory_limit'))) . '</em></div>' . "\n";
-  //echo '<div style="display: inline-block; float: right; text-align: right;">'
-  //. '  <em style="font-size: 13px;">Source (code): [<b>' .formatSizeUnits($total_filesize) . '</b>]  [<b>'. $total_files . '</b> files]  [<b>' . ($total_lines + $sql_lines) . '</b> lines]</em>'
-  //. '</div>';
+  echo '<div style="display: inline-block; float: right; text-align: right;">'
+  . '  <em style="font-size: 13px;">Source (code): [<b>' .formatSizeUnits($total_filesize) . '</b>]  [<b>'. $total_files . '</b> files]  [<b>' . ($total_lines + $sql_lines) . '</b> lines]</em>'
+  . '</div>';
   echo '<div id="chartContainer" style="height: 195px; display: inline-block; width: 48%;"></div>' . "\n";
   echo '<div id="chartContainer2" style="height: 195px; display: inline-block; width: 48%;"></div>' . "\n";
   echo '<pre style="font-size: 12px;">' . "\n";
