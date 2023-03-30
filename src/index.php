@@ -182,7 +182,7 @@ HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no AS
 $stmt->execute(array());
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>  
-    <table style="margin: 0px auto; width: 675px;">
+    <table style="margin: 0px auto 15px auto; width: 675px;">
       <caption style="text-align: left;">Recent (5) Client Entries</caption>
       <colgroup>
         <!-- <col style="width: 8%;"> -->
@@ -245,7 +245,7 @@ else { ?>
 <?php } ?>
       </tbody>
     </table>
-    <br /><hr />
+    <hr />
 <?php
 $stmt = $pdo->prepare('SELECT `id`, `hamper_no`, `transport_method`, `group_size`, `phone_number_1`, `address` FROM `hampers` ORDER BY `id` DESC LIMIT 5;'); // WHERE `created_date` >= ( CURDATE() - INTERVAL 30 DAY ) 
 $stmt->execute();

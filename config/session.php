@@ -18,11 +18,12 @@ ini_set('session.save_path', SESSION_SAVE_PATH);
 
 $_SESSIONS = array();
 
+/*
 if (ini_get("session.use_cookies"))
   if (key($_GET) == 'logout' && isset($_COOKIE['PHPSESSID'])) {
-    unset($_COOKIE['PHPSESSID']);
-    setcookie(session_name(), '', -1, '/'); // time() - 3600
+    exit(require APP_PATH . APP_BASE['public'] . 'logout.php');
   }
+*/
 
 !isset($_COOKIE['PHPSESSID']) || $_COOKIE['PHPSESSID'] == '' // $_COOKIE['PHPSESSID'] = session_create_id();
   and setcookie('PHPSESSID', session_create_id(), 0 /* time()+3600 */) . exit(header('Location: ' . APP_URL_BASE));
@@ -176,9 +177,7 @@ $_SESSIONS[$_COOKIE['PHPSESSID']] = array_replace($_SESSIONS[$_COOKIE['PHPSESSID
 if ($_SERVER['REQUEST_METHOD'] == 'GET')
   $session_save();
 
-//!defined('APP_DEBUG') and define('APP_DEBUG', FALSE);
-
-if ((defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? TRUE : FALSE) : TRUE))
+if ((!defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? TRUE : FALSE) : TRUE))
   switch ($_SERVER['REQUEST_METHOD']) {
     default:
       if (key($_GET) == 'session')
@@ -193,7 +192,6 @@ if ((defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? T
           exit(header('Location: ' . APP_URL_BASE));
         else
           exit(require APP_PATH . APP_BASE['public'] . 'login.php');
-
       elseif (key($_GET) == 'logout')
         if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) // $_SESSION['user_id'] >= 0
           exit(require APP_PATH . APP_BASE['public'] . 'logout.php');
@@ -206,14 +204,8 @@ if ((defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? T
         if ((!isset($_SESSION['last_access'])?: time() - $_SESSION['last_access']) > SESSION_LIFETIME)
           if ($_SERVER['REQUEST_METHOD'] == "POST") break;
 
-        if (!isset($_SESSION['user_id']) || is_null($_SESSION['user_id']) || is_string($_SESSION['user_id'])) {
-          //$_SESSION['enable_ssl'] = false;
+        if (!isset($_SESSION['user_id']) || is_null($_SESSION['user_id']) || is_string($_SESSION['user_id']))
           exit(header('Location: ' . APP_URL_BASE . '?login'));
-        //exit(header('Location: ' . APP_URL['scheme'] . '://' . APP_URL['host'] . APP_URL['path'] . '?login'));
-        //require '../src/session_login.php';
-        //require 'install.php';  // <<< SESSION Bug exists follow the trail ...
-        //header('Location: ' . APP_URL_BASE . '?login');
-        }
       }
       break;
   }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 if (count(get_included_files()) == ((version_compare(PHP_VERSION, '5.0.0', '>=')) ? 1:0 )):
   exit('Direct access is not allowed.');
 endif;
@@ -20,8 +21,8 @@ isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] == 'on'
 // Application configuration
 define('APP_START',     microtime(true));
 define('APP_NAME',      'Christmas Hamper ' . date('Y'));
-/* This code defines a constant named APP_DOMAIN that represents the domain name of the current website. */
 (isset($_GET['debug']) ? define('APP_DEBUG', TRUE) : NULL);
+/* This code defines a constant named APP_DOMAIN that represents the domain name of the current website. */
 define('APP_DOMAIN',    isset($_SERVER['HTTP_HOST']) === true ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
 define('APP_VERSION',   number_format(1.0, 1) . '.1');
 define('APP_TIMEOUT',   strtotime('1970-01-01 08:00:00'.'GMT'));
@@ -46,9 +47,15 @@ preg_match('/^(\/home\/\w+\/).+$/', dirname(__DIR__, 1), $matches)
   ]) : // ./localhost/../
   define('APP_PATH', __DIR__ . DIRECTORY_SEPARATOR); // /var/www/html/
 
+if (defined('APP_BASE'))
+  foreach (APP_BASE as $key => $path) {
+    if (!is_dir(APP_PATH . $path))
+      echo @mkdir(APP_BASE[$key], 0755, true) . 'Created directory path: ' . APP_BASE[$key] . "<br />\n";
+  }
+
 //ini_set("include_path", "src");
 ini_set('error_log', APP_PATH . 'error_log');
-ini_set('log_errors', 1);
+ini_set('log_errors', '1');
 
 (defined('APP_DOMAIN') && APP_DOMAIN != 'localhost') ?
 // This code sets the APP_ENV constant to 'production' and creates a file named .env.production in the application directory if it doesn't already exist.
@@ -68,10 +75,8 @@ ini_set('log_errors', 1);
   or define('APP_SELF', (!empty(get_included_files()) ? get_included_files()[0] : __FILE__)); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
 
 /* The purpose of this code is to ensure that $_SERVER['REQUEST_URI'] is set with the correct value, which can be used by the application to determine the requested URL and any parameters passed to it. */
-
 !isset($_SERVER['REQUEST_URI'])
   and $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 0) . ((isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] != "") AND '?' . $_SERVER['QUERY_STRING']);
-
 
 // substr( str_replace('\\', '/', __FILE__), strlen($_SERVER['DOCUMENT_ROOT']), strrpos(str_replace('\\', '/', __FILE__), '/') - strlen($_SERVER['DOCUMENT_ROOT']) + 1 )
 /* This code checks if the first part of the URI is equal to a single slash (/). If it is, this means that the script is being accessed at the root level of the domain,
@@ -108,18 +113,6 @@ define('APP_QUERY', (!empty(parse_url($_SERVER['REQUEST_URI'])['query']) ? (pars
       )
     )
   );
-
-/*
-function shutdown()
-{
-	global $pdo; //$myiconnect;
-    // This is our shutdown function, in 
-    // here we can do any last operations
-    // before the script is complete.
-	//mysqli_close($myiconnect);
-
-  unset($pdo);
-}*/
 
 register_shutdown_function( // 'shutdown'
   function() {

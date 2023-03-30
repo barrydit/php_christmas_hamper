@@ -1,6 +1,6 @@
 <?php
 if (session_status() == PHP_SESSION_NONE):
-  require_once dirname(__DIR__, 1) . '/config/session.php'; // session_start();
+  session_start();
 endif;
 
 ob_start();
@@ -29,7 +29,8 @@ session_unset(); // $_SESSION = array();
 session_destroy();
 session_write_close();
 
-die ();
+unset($_COOKIE['PHPSESSID']);
+setcookie(session_name(), '', -1, '/'); // time() - 3600
 
 // die(var_dump($_SESSIONS)); // $_SESSION
 
