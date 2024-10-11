@@ -1,5 +1,5 @@
 <?php
-if (!defined('APP_BASE_PATH')) exit('No direct script access allowed');
+if (!defined('APP_PATH')) exit('No direct script access allowed');
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST':
@@ -27,11 +27,12 @@ FROM
 WHERE `phone_number` LIKE :phone_number
 GROUP BY phone_number_1
 HAVING COUNT(phone_number_1) > 1;
-HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
+HERE
+); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-        $stmt->execute(array(
+        $stmt->execute([
           ":phone_number" => (!empty($_POST['phone_number']) ? $_POST['phone_number'] . '%' : '%'),
-        ));
+        ]);
         
         break;
       }
@@ -54,10 +55,10 @@ HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no AS
 
       //$stmt = $pdo->prepare('SELECT h.`id` AS h_id, h.`hamper_no`, h.`client_id` AS c_id, c.`id`, `hamper_id`, `first_name`, `last_name`, c.`phone_number_1`, c.`address`, YEAR(h.`created_date`) AS h_year, IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) AS hamper_no, IF(IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) IS NULL,1,0) AS sort FROM `clients` as c LEFT JOIN `hampers` AS h ON c.`id` = h.`client_id` AND c.`hamper_id` = h.`id` OR c.`hamper_id` IS NULL WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ORDER BY `last_name`;'); // ORDER BY sort, hamper_no,
 
-      $stmt->execute(array(
-        ":last_name" => (!empty($full_name[0]) ? $full_name[0] . '%' : '%'),
-        ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-      ));
+      $stmt->execute([
+        ":last_name" => (!empty($full_name[0]) ? "$full_name[0]%" : '%'),
+        ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+      ]);
       
       
       break;
@@ -77,11 +78,12 @@ FROM
 WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name 
 GROUP BY phone_number_1
 HAVING COUNT(phone_number_1) > 1;
-HERE);
-        $stmt->execute(array(
-          ":last_name" => (!empty($full_name[0]) ? $full_name[0] . '%' : '%'),
-          ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-        ));
+HERE
+);
+        $stmt->execute([
+          ":last_name" => (!empty($full_name[0]) ? "$full_name[0]%" : '%'),
+          ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+        ]);
         
         //die($stmt->debugDumpParams());
       
@@ -101,20 +103,17 @@ HERE);
 
       $stmt = $pdo->prepare("SELECT `last_name`, `first_name` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name GROUP BY `last_name`" . (count($full_name) == 2 ? ', `first_name`' : '') . (count($full_name) == 1 ? ' HAVING COUNT(`last_name`) >= 1' : '') . ";");
 
-      $stmt->execute(array(
-        ":last_name" => $full_name[0] . '%',
-        ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-      ));
+      $stmt->execute([
+        ":last_name" => "$full_name[0]%",
+        ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+      ]);
 
       $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
       
       $data['results'] = [];
       
       while($row = array_shift($rows)) {
-        if (count($full_name) == 1)
-          $data['results'][] = array('name' => $row['last_name']); // . ', ' . $row['first_name']
-        else
-          $data['results'][] = array('name' => $row['last_name'] . ',&nbsp;' . $row['first_name']);
+        $data['results'][] = (count($full_name) == 1) ? ['name' => $row['last_name']] : ['name' => $row['last_name'] . ',&nbsp;' . $row['first_name']];
       }
 
       exit(json_encode($data));
@@ -132,8 +131,9 @@ FROM
 WHERE last_name != ''
 GROUP BY last_name
 HAVING COUNT(last_name) > 1;
-HERE);
-    $stmt->execute(array());
+HERE
+);
+    $stmt->execute([]);
 
     break;
 }
@@ -149,10 +149,10 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
 
   <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -269,43 +269,45 @@ td {
       <tbody>
 <?php
 $rows_duplicate = $rows;
-$rows_clients = array();
+$rows_clients = [];
 
 if (!empty($rows))
   while($row = array_shift($rows)) { //$result = $stmt->fetch()
   //  GROUP BY phone_number_1 HAVING COUNT(phone_number_1) > 1;
     $stmt1 = $pdo->prepare('SELECT id, last_name, first_name, phone_number_1, address FROM clients WHERE last_name LIKE :last_name AND first_name LIKE :first_name GROUP BY first_name HAVING COUNT(first_name) > 1;');
-    $stmt1->execute(array(
-      ":last_name" => (!empty($row['last_name']) ? $row['last_name'] . '%' : '%'),
-      ":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%'))
+    $stmt1->execute(
+      [
+        ":last_name" => (!empty($row['last_name']) ? $row['last_name'] . '%' : '%'),
+        ":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%')
+      ]
     );
 
     $rows1 = $stmt1->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results    
     while($row1 = array_shift($rows1)) {
-      $rows_clients[] = array(
+      $rows_clients[] = [
         'id' => $row1['id'],
         'last_name' => $row1['last_name'],
         'first_name' => $row1['first_name'],
         'phone_number_1' => $row1['phone_number_1'],
         'address' => $row1['address'],
-      );
+      ];
     }
   }
 /*
 if (!empty($rows_duplicate))
   while($row = array_shift($rows_duplicate)) { //$result = $stmt->fetch()
     $stmt2 = $pdo->prepare('SELECT id, last_name, first_name, phone_number_1, address FROM clients WHERE first_name LIKE :first_name ;'); // GROUP BY phone_number_1 HAVING COUNT(phone_number_1) > 1
-    $stmt2->execute(array(":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%')));
+    $stmt2->execute([":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%']));
 
     $rows2 = $stmt2->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results    
     while($row2 = array_shift($rows2)) {
-        $rows_clients[] = array(
+        $rows_clients[] = [
           'id' => $row2['id'],
           'last_name' => $row2['last_name'],
           'first_name' => $row2['first_name'],
           'phone_number_1' => $row2['phone_number_1'],
           'address' => $row2['address'],
-        );
+        ];
     }
   }
 */
@@ -331,10 +333,10 @@ else { ?>
     </table>
   </div>
 
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery-mask/jquery.mask.min.js"></script>
 <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
 
@@ -350,7 +352,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ) )?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query(['search' => 'clients'] )?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

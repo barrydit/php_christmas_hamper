@@ -1,7 +1,7 @@
 <?php
 
-require_once('config.php');
-require_once('functions.php');
+require_once 'config.php';
+require_once 'functions.php';
 /*
 $ob_contents = null;
 try {
@@ -18,39 +18,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   if ($_POST['method'] == 'backup') {
 
     $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
-    $stmt->execute(array(
+    $stmt->execute([
       ":date" => date('Y')
-    ));
+    ]);
   
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!empty($row)) {
 
       $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC;');
-      $stmt->execute(array(
+      $stmt->execute([
         ":date" => date('Y')
-      ));
+      ]);
 
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
         $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE `id` = :client_id AND `hamper_id` = :hamper_id ;');
-        $stmt->execute(array(
+        $stmt->execute([
           ":client_id" => $row['client_id'],
           ":hamper_id" => $row['id']
-        ));
+        ]);
       }
 
       $stmt = $pdo->prepare('SELECT `id`, `client_id`, YEAR(`created_date`) FROM `hampers` WHERE YEAR(`created_date`) >= :date ORDER BY `id` DESC LIMIT 1;');
-      $stmt->execute(array(
+      $stmt->execute([
         ":date" => date('Y')
-      ));
+      ]);
 
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if (!empty($row)) {
         $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-        $stmt->execute(array(
+        $stmt->execute([
           ":date" => date('Y')
-        ));
+        ]);
       } else {
         exec('mysqldump'
         . ' --user=' . DB_UNAME
@@ -217,23 +217,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 
-$files = array(/*0 => array('path', 'filesize')*/ );
+$files = [/*0 => array('path', 'filesize')*/];
 
 foreach (glob("config/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("database/*.sql") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("public/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("src/*.php") as $filename) {
     //echo "$filename size " . filesize($filename) . "\n";
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 
 $total_files = 0;
@@ -564,7 +564,7 @@ if (!empty($FoundFiles)) {
       </div>
     </div>
 
-    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+    <script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/js/jquery/jquery.min.js"></script>
 <script>
 
 function showInstallForm() {
@@ -619,7 +619,7 @@ document.getElementById("q2_y").onclick = function() {
 }
 
 </script>    
-    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
+    <script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

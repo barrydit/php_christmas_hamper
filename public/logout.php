@@ -1,4 +1,9 @@
 <?php
+
+require_once('../config/config.php');
+
+//require_once('../config/constants.php');
+
 if (session_status() == PHP_SESSION_NONE):
   session_start();
 endif;
@@ -21,7 +26,7 @@ $_SESSION['user_id'] = '';
 // preg_match('/^[a-zA-Z0-9,-]{22,40}$/', session_id())
 
 // Destroying All Sessions
-session_unset(); // $_SESSION = array();
+session_unset(); // $_SESSION = [];
 
 //if (ini_get("session.use_cookies"))
   //$params = session_get_cookie_params(); 
@@ -48,10 +53,10 @@ $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="Refresh" content="3; url='<?=APP_URL_PATH?>'" /> 
+    <meta http-equiv="Refresh" content="3; url='<?=APP_URL_BASE?>'" /> 
     <title>Dr. David Raymant - <?=APP_NAME?> -- Logout</title>
 
-    <base href="<?=(!is_array(APP_URL) ? APP_URL : APP_URL_BASE)?>" />
+    <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE ?>" />
   
     <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>favicon.ico" />
 
@@ -78,7 +83,7 @@ $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
           </p>
         </div>
         <div style="position: relative; white-space: nowrap; border-top: 1px dotted black; margin: 5px; line-height: 0px; width: 385px;">
-          <p style="text-align: left; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, array('.' => '_'))?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), array('.' => '')));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
+          <p style="text-align: left; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, ['.' => '_'])?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), ['.' => '']));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
         </div>
       </div><!--end log-form -->
     </div>

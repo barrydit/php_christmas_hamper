@@ -1,5 +1,5 @@
 <?php
-if (!defined('APP_BASE_PATH')) exit('No direct script access allowed');
+if (!defined('APP_PATH')) exit('No direct script access allowed');
 
 //require COMPOSER_AUTOLOAD_PATH.'autoload.php'; // composer dump -o
 
@@ -35,7 +35,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
       $stmt = $pdo->prepare($prepare_query);
     
-      $stmt->execute(array());
+      $stmt->execute([]);
 
       $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
       
@@ -132,7 +132,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     //die($prepare_query);
 
     $stmt = $pdo->prepare($prepare_query);
-    $stmt->execute(array());
+    $stmt->execute([]);
       
     //$stmt->debugDumpParams();
       
@@ -259,7 +259,7 @@ $group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
     <div style="margin: 0px auto; padding: 15px 0px 20px 0px; width: 98%;">
 
-      <form style="display: inline; padding-left: 15px;" action="<?='?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="GET">
+      <form style="display: inline; padding-left: 15px;" action="<?='?' . http_build_query(['reports' => ''])?>" autocomplete="off" method="GET">
         <input type="hidden" name="reports" value="" />
         <input type="hidden" name="date" value="<?=(empty($date) ? date('Y') : date_parse($date.'-01-01')['year'])?>" />
 <?php if (!empty($_GET['transport_method'])) { ?>
@@ -274,7 +274,7 @@ $group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
         <caption style="font-weight: bolder;"><input type="checkbox" checked="" disabled="" />Hampers: (<?=count($rows)?>)</caption>
       </form>
 
-      <form style="float: right; margin-right: 10px;" action="<?='?' . http_build_query( array('reports' => ''))?>" autocomplete="off" method="POST">
+      <form style="float: right; margin-right: 10px;" action="<?='?' . http_build_query(['reports' => ''])?>" autocomplete="off" method="POST">
       <div style="display: inline; margin-right: 10px;">
         <label for="transport_method">PU/D:</label>
 <?php
@@ -340,7 +340,7 @@ $_GET = $_GET + (array) ['date' => ''];
           <select onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
 <?php
   $stmt = $pdo->prepare('SELECT DISTINCT YEAR(`created_date`) FROM `hampers` ORDER BY `created_date` DESC;');
-  $stmt->execute(array());
+  $stmt->execute([]);
   
   $rows_date = $stmt->fetchAll(PDO::FETCH_ASSOC);
   
@@ -367,7 +367,7 @@ $_GET = $_GET + (array) ['date' => ''];
 // `id`, `client_id`, `hamper_no`, `minor_children
   //$stmt = $pdo->prepare('SELECT `id`, `client_id`, `hamper_no`, `minor_children` FROM `hampers` WHERE YEAR(`created_date`) = "' . date('2021') . '" AND `minor_children` != "" ORDER BY `id` ASC;');
     
-  //$stmt->execute(array());
+  //$stmt->execute([]);
 
   //$children_rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -489,7 +489,7 @@ $_GET = $_GET + (array) ['date' => ''];
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">&lt;3</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">4-6</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">7-9</div>
-        <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">10-12</div>
+        <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">10-12</div>
         <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">13-18</div>
       </div>
       <div style="display: table-row;">
@@ -508,7 +508,7 @@ $_GET = $_GET + (array) ['date' => ''];
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">&lt;3</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">4-6</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">7-9</div>
-        <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">10-12</div>
+        <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">10-12</div>
         <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">13-18</div>
       </div>
       <div style="display: table-row;">
@@ -527,7 +527,7 @@ $_GET = $_GET + (array) ['date' => ''];
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">&lt;3</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">4-6</div>
         <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">7-9</div>
-        <div style="display: table-cell; border: 1px solid #000; width: 25px; padding: 5px; font-weight: bold;">10-12</div>
+        <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">10-12</div>
         <div style="display: table-cell; border: 1px solid #000; width: 35px; padding: 5px; font-weight: bold;">13-18</div>
       </div>
       <div style="display: table-row;">

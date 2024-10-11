@@ -49,9 +49,9 @@ WHERE h2.id IS NULL AND c.`phone_number_1` LIKE :phone_number
 ORDER BY c.`phone_number_1`;
 HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-        $stmt->execute(array(
+        $stmt->execute([
           ":phone_number" => (!empty($_POST['phone_number']) ? $_POST['phone_number'] . '%' : '%'),
-        ));
+        ]);
         
         break;
       }
@@ -94,10 +94,10 @@ HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no AS
 
       //$stmt = $pdo->prepare('SELECT h.`id` AS h_id, h.`hamper_no`, h.`client_id` AS c_id, c.`id`, `hamper_id`, `first_name`, `last_name`, c.`phone_number_1`, c.`address`, YEAR(h.`created_date`) AS h_year, IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) AS hamper_no, IF(IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) IS NULL,1,0) AS sort FROM `clients` as c LEFT JOIN `hampers` AS h ON c.`id` = h.`client_id` AND c.`hamper_id` = h.`id` OR c.`hamper_id` IS NULL WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ORDER BY `last_name`;'); // ORDER BY sort, hamper_no,
 
-      $stmt->execute(array(
-        ":last_name" => (!empty($full_name[0]) ? $full_name[0] . '%' : '%'),
-        ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-      ));
+      $stmt->execute([
+        ":last_name" => (!empty($full_name[0]) ? "$full_name[0]%" : '%'),
+        ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+      ]);
       
       
       break;
@@ -137,10 +137,10 @@ FROM `clients` AS c
                              )
 WHERE h2.id IS NULL AND `last_name` LIKE :last_name AND `first_name` LIKE :first_name ;
 HERE);
-        $stmt->execute(array(
-          ":last_name" => (!empty($full_name[0]) ? $full_name[0] . '%' : '%'),
-          ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-        ));
+        $stmt->execute([
+          ":last_name" => (!empty($full_name[0]) ? "$full_name[0]%" : '%'),
+          ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+        ]);
       
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
       }
@@ -158,20 +158,17 @@ HERE);
 
       $stmt = $pdo->prepare("SELECT `last_name`, `first_name` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name GROUP BY `last_name`" . (count($full_name) == 2 ? ', `first_name`' : '') . (count($full_name) == 1 ? ' HAVING COUNT(`last_name`) >= 1' : '') . ";");
 
-      $stmt->execute(array(
-        ":last_name" => $full_name[0] . '%',
-        ":first_name" => (!empty($full_name[1]) ? $full_name[1] . '%' : '%')
-      ));
+      $stmt->execute([
+        ":last_name" => "$full_name[0]%",
+        ":first_name" => (!empty($full_name[1]) ? "$full_name[1]%" : '%')
+      ]);
 
       $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
       
       $data['results'] = [];
       
       while($row = array_shift($rows)) {
-        if (count($full_name) == 1)
-          $data['results'][] = array('name' => $row['last_name']); // . ', ' . $row['first_name']
-        else
-          $data['results'][] = array('name' => $row['last_name'] . ',&nbsp;' . $row['first_name']);
+        $data['results'][] = (count($full_name) == 1) ? ['name' => $row['last_name']] : ['name' => $row['last_name'] . ',&nbsp;' . $row['first_name']];
       }
 
       exit(json_encode($data));
@@ -210,7 +207,7 @@ FROM `clients` AS c
 WHERE h2.id IS NULL AND c.`minor_children` != '' AND IF(IF(YEAR(h1.`created_date`)=YEAR(CURDATE()), h1.`hamper_no`, NULL) IS NULL,1,0) = 0
 ORDER BY `group_size`, `last_name`;
 HERE);
-    $stmt->execute(array());
+    $stmt->execute([]);
 
     break;
 }
@@ -226,10 +223,10 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
 
   <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE)?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH )?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH )?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH )?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -299,7 +296,7 @@ td {
       </h3>
     </div>
     <div style="padding: 0px 20px 10px 20px;">
-      Client [ <?= ($client_dup_count > 0 ? '<a href="?client=duplicate"> (<code style="color: red;">' . $client_dup_count . '</code>) Duplicates</a> | ' : '' ) ?><a href="?client=children">Children</a> ]
+      Client [ <?= $client_dup_count > 0 ? "<a href=\"?client=duplicate\"> (<code style=\"color: red;\">$client_dup_count</code>) Duplicates</a> | " : '' ?><a href="?client=children">Children</a> ]
     </div>
   </div>
 
@@ -318,7 +315,7 @@ td {
           </datalist>&nbsp;&nbsp;&nbsp;
         </div>
         <div style="display: tale-cell; text-align: right; padding-right: 25px;">
-          <input type="submit" value="  Search  " style="border: none; cursor: pointer; box-shadow: 0 2px 5px 0 rgb(94, 158, 214); min-width: 90px; border-radius: 2px; padding: 2px 4px; outline: none; border: 1px solid  rgb (94, 158, 214); border-radius:0;"/>
+          <input type="submit" value="  Search  " style="border: 2px dashed red; cursor: pointer; box-shadow: 0 2px 5px 0 rgb(94, 158, 214); min-width: 90px; border-radius: 2px; padding: 2px 4px; outline: none; border: 1px solid  rgb (94, 158, 214); border-radius:0;"/>
         </div>
       </div>
     </form>
@@ -342,21 +339,26 @@ if (!empty($rows)) {
     foreach($minor_children AS $child) {
       $gender = $age = NULL;
       if (!is_numeric($child)) list($gender,$age) = sscanf(trim($child), "%[A-Z]%d");
-      else list($age) = sscanf(trim($child), "%d");
-
-      if ($gender == 'F')
-        $female_count++;
-      elseif ($gender == 'M')
-        $male_count++;
-      else
-        $neutral_count++;
+      else [$age] = sscanf(trim($child), "%d");
+      
+      switch ($gender) {
+        case 'F':
+          $female_count++;
+          break;
+        case 'M':
+          $male_count++;
+          break;
+        default:
+          $neutral_count++;
+          break;
+      }
     }
   }
   $child_count = $neutral_count + $male_count + $female_count;
 
-  echo ', ' . $child_count . ' Children [' . $male_count . ' Male, ' . $female_count  . ' Female, ' . $neutral_count . ' Gender Neutral]';
+  echo ", $child_count Children <span style=\"float: right;\">[$male_count Male, $female_count Female, $neutral_count Gender Neutral]</span>";
  } else {
-   echo ' [PRESS <code style="color: red;">SEARCH</code>]';
+   echo ' <span style="float: right;">[PRESS <code style="color: red;">SEARCH</code>]</span>';
  }
 ?></caption>  
       <colgroup>
@@ -393,10 +395,10 @@ else { ?>
     </table>
   </div>
 
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
@@ -413,7 +415,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query(array('search'=>'clients'))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query(['search' => 'clients'])?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

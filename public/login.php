@@ -31,17 +31,18 @@ try {
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST':
-    // die(var_dump($_POST));
 
-    if (isset($_REQUEST['submit-register'])) {
+    /*if (isset($_REQUEST['submit-register'])) {
       $stmt = $pdo->prepare("INSERT INTO `users` (`name`, `username`, `password`) VALUES (?, ?, ?);");
-      $stmt->execute(array(
+      $stmt->execute([
         (($_REQUEST['name'] != false) ? $_REQUEST['name'] : NULL),
         (!empty($_REQUEST['username']) ? $_REQUEST['username'] : NULL),
         (!empty($_REQUEST['password']) ? password_hash($_REQUEST['password'], PASSWORD_DEFAULT) : NULL)
-      ));
+      ]);
       exit(header('Location: ' . APP_URL_BASE));
-    } elseif (isset($_REQUEST['submit-login'])) {
+    } else */
+    if (isset($_REQUEST['submit-login'])) {
+    //die(var_dump($_POST));
 
   //$username = stripslashes($_POST['username']);
   //$username = mysqli_real_escape_string($myiconnect, $username);
@@ -55,9 +56,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
   //$sql = '';
 
       $stmt = $pdo->prepare("SELECT `id`, `username`, `password` FROM `users` WHERE `username` = :username;");
-      $stmt->execute(array(
+      $stmt->execute([
         ":username" => $_POST['username']
-      ));
+      ]);
       $row_login = $stmt->fetch();
 
       if (!empty($row_login))
@@ -74,7 +75,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
   
   case 'GET':
     $stmt = $pdo->prepare("SELECT `id` FROM `users` LIMIT 1;");
-    $stmt->execute(array());
+    $stmt->execute([]);
     $row_login = $stmt->fetch();
     
     $_SESSION['token'] = md5(uniqid(mt_rand(), true)); // bin2hex(random_bytes(35));
@@ -85,7 +86,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 /*
 $hash = '$2y$12$Cz/AlKIOBS7aAJ8Qoy2AFOua4A9VLzHLyX0vaweWc7SP3JA/MwU2C'; // password
 
-$options = array('cost' => 12);
+$options = ['cost' => 12];
 echo 'Password: ' . password_hash("", PASSWORD_BCRYPT, $options) . '<br />'; 
 
 die();
@@ -97,11 +98,11 @@ die();
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><?=APP_NAME?> -- Login</title>
 
-    <base href="<?=(!is_array(APP_URL) ? APP_URL : APP_URL_BASE)?>" />
+    <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE?>" />
     
-    <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>favicon.ico" />
+    <link rel="shortcut icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>favicon.ico" />
 
-    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/css/styles.css" />
 
     <style type="text/css">
 table, td {
@@ -138,7 +139,7 @@ td {
     <div class="log-form">
       <div style="border-bottom: 1px dotted black; margin: 5px; line-height: 0px;">
         <a class="showHideMe"><em>Open Debug</em> &#9650;</a>
-        <p style="text-align: right; font-size: 12px; font-weight: bold; margin-top: 5px;"><a href="release-notes-<?=APP_VERSION?>.html"><?=APP_NAME?> (v. <?=APP_VERSION?>)</a></p>
+        <p style="text-align: right; font-size: 12px; font-weight: bold; margin-top: 5px;"><a href="release-notes.php"><?=APP_NAME?></a> (<a href="release-notes.php?v=<?=APP_VERSION?>">v. <?=APP_VERSION?></a>)</p>
       </div>
 <?php if (!empty($row_login)) { ?>
       <h3 style="margin: 10px 5px;">Log-in to your account</h3>
@@ -203,7 +204,7 @@ td {
       </form>
 <?php } ?>
       <div style="position: relative; white-space: nowrap; border-top: 1px dotted black; margin: 5px; line-height: 0px; width: 385px;">
-        <p style="text-align: left; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, array('.' => '_'))?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), array('.' => '')));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
+        <p style="text-align: left; font-size:10px; font-weight: bold;">PHP Version: <a href="https://www.php.net/releases/<?=strtr(PHP_VERSION, ['.' => '_'])?>.php"><?=PHP_VERSION?></a> | MySQL (<a href="https://pecl.php.net/package/PDO_MYSQL">pdo</a>): <a href="https://mariadb.com/kb/en/mariadb-<?=preg_replace("/[^0-9]/", "", strtr($pdo->query('select version()')->fetchColumn(), ['.' => '']));?>-release-notes/"><?=$pdo->query('select version()')->fetchColumn();?></a></p>
       </div>
     </div><!--end log-form -->
   
@@ -212,11 +213,6 @@ td {
     <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
   
     <script type="text/javascript">
-
-$(document).ready(function() {
-
-});
-
 $(document).ready(function(){
   $('.showHideMe').click(function() {
     if ($( ".debug" ).css('display') == 'none') {

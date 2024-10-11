@@ -1,11 +1,13 @@
 <?php
 
-defined('APP_BASE_PATH') // $_SERVER['DOCUMENT_ROOT']
-  or define('APP_BASE_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR);
+defined('APP_PATH') // $_SERVER['DOCUMENT_ROOT']
+  or define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR);
 
-require(APP_BASE_PATH . 'config/config.php');
+require APP_PATH . 'index.php';
 
-require(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'); // composer dump -o
+require_once APP_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'; // composer dump -o
+
+//die(var_dump(get_required_files()));
 
 switch($_SERVER['SERVER_NAME']) {
   case stristr($_SERVER['SERVER_NAME'], isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']):
@@ -17,7 +19,7 @@ switch($_SERVER['SERVER_NAME']) {
     }
 
     break;
-    
+
   default:
     if (!isset($_SERVER['HTTPS']) && @$_SESSION['enable_ssl'] == TRUE):
       exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE . $_SERVER['QUERY_STRING'])));
@@ -47,25 +49,25 @@ switch ($_SERVER['REQUEST_METHOD']) {
       */
       
         $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date LIMIT 1;');
-        $stmt->execute(array(
+        $stmt->execute([
           ":date" => date('Y')
-        ));
+        ]);
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!empty($row)) {
           $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
-          $stmt->execute(array(
+          $stmt->execute([
             ":date" => date('Y')
-          ));
+          ]);
         
           $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
           if (!empty($row)) {
             $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-            $stmt->execute(array(
+            $stmt->execute([
               ":date" => date('Y')
-            ));
+            ]);
           }
         }
         
@@ -75,52 +77,52 @@ switch ($_SERVER['REQUEST_METHOD']) {
         */
 
         $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
-        $stmt->execute(array(
+        $stmt->execute([
           ":date" => date('Y')
-        ));
+        ]);
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!empty($row)) {
       
           $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
-          $stmt->execute(array(
+          $stmt->execute([
             ":date" => date('Y')
-          ));
+          ]);
         
           $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
           if (!empty($row)) {
             $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC;');
-            $stmt->execute(array(
+            $stmt->execute([
               ":date" => date('Y')
-            ));
+            ]);
         
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
               $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE `id` = :client_id AND `hamper_id` = :hamper_id ;');
-              $stmt->execute(array(
+              $stmt->execute([
                 ":client_id" => $row['client_id'],
                 ":hamper_id" => $row['id']
-              ));
+              ]);
             }
           
             $stmt = $pdo->prepare('SELECT `id`, `client_id`, YEAR(`created_date`) FROM `hampers` WHERE YEAR(`created_date`) >= :date ORDER BY `id` DESC LIMIT 1;');
-            $stmt->execute(array(
+            $stmt->execute([
               ":date" => date('Y')
-            ));
+            ]);
           
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
           
             if (!empty($row)) {
               $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-              $stmt->execute(array(
+              $stmt->execute([
                 ":date" => date('Y')
-              ));
+              ]);
             } else {
               $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC LIMIT 1;');
-              $stmt->execute(array(
+              $stmt->execute([
                 ":date" => date('Y')
-              ));
+              ]);
         
               $row = $stmt->fetch(PDO::FETCH_ASSOC);
               
@@ -141,7 +143,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 if (!empty($output)) die(var_dump($output));
               } else {
                 $stmt = $pdo->prepare('TRUNCATE TABLE `hampers`;');
-                $stmt->execute(array());
+                $stmt->execute([]);
               }
             
               // check if there are any rows for curr_year ... backup, otherwise truncate
@@ -158,40 +160,42 @@ GROUP BY last_name
 HAVING COUNT(last_name) > 1;
 HERE
 );
-    $stmt->execute(array());
+    $stmt->execute([]);
     
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
 
     $rows_duplicate = $rows;
-    $rows_clients = array();
+    $rows_clients = [];
 
     if (!empty($rows))
       while($row = array_shift($rows)) { //$result = $stmt->fetch()
   //  GROUP BY phone_number_1 HAVING COUNT(phone_number_1) > 1;
         $stmt1 = $pdo->prepare('SELECT id FROM clients WHERE last_name LIKE :last_name AND first_name LIKE :first_name GROUP BY first_name HAVING COUNT(first_name) > 1;');
-        $stmt1->execute(array(
-          ":last_name" => (!empty($row['last_name']) ? $row['last_name'] . '%' : '%'),
-          ":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%'))
+        $stmt1->execute(
+          [
+            ":last_name" => (!empty($row['last_name']) ? $row['last_name'] . '%' : '%'),
+            ":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%')
+          ]
         );
 
         $rows1 = $stmt1->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results    
         while($row1 = array_shift($rows1)) {
-          $rows_clients[] = array(
+          $rows_clients[] = [
             'id' => $row1['id']
-          );
+          ];
         }
       }
 
     if (!empty($rows_duplicate))
       while($row = array_shift($rows_duplicate)) { //$result = $stmt->fetch()
         $stmt2 = $pdo->prepare('SELECT id, last_name, first_name, phone_number_1, address FROM clients WHERE phone_number_1 != "" AND first_name LIKE :first_name GROUP BY phone_number_1 HAVING COUNT(phone_number_1) > 1;');
-        $stmt2->execute(array(":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%')));
+        $stmt2->execute([":first_name" => (!empty($row['first_name']) ? $row['first_name'] . '%' : '%')]);
 
         $rows2 = $stmt2->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results    
         while($row2 = array_shift($rows2)) {
-          $rows_clients[] = array(
+          $rows_clients[] = [
             'id' => $row2['id']
-          );
+          ];
         }
       }
 
@@ -199,73 +203,73 @@ HERE
 
     $client_dup_count = count($rows_clients);
 
-    if (key($_GET) == '')
-      require APP_PATH . APP_BASE['src'] . 'index.php';
-    elseif (key($_GET) == 'search')
-      if (current($_GET) == 'clients')
-        require APP_PATH . APP_BASE['src'] . 'search_client.php';
-      elseif (current($_GET) == 'hampers')
-        require APP_PATH . APP_BASE['src'] . 'search_hamper.php';
-      else
-        exit(header('Location: ' . APP_URL_BASE));
-    elseif (key($_GET) == 'client')
-      if (current($_GET) == 'entry' || empty(current($_GET)))
-        require APP_PATH . APP_BASE['src'] . 'entry_client.php';
-      elseif (current($_GET) == 'children')
-        require APP_PATH . APP_BASE['src'] . 'client_children.php';
-      elseif (current($_GET) == 'duplicate')
-        require APP_PATH . APP_BASE['src'] . 'client_duplicate.php';
-      elseif ((int) current($_GET))
-        require APP_PATH . APP_BASE['src'] . 'entry_client.php';
-      else
-        exit(header('Location: ' . APP_URL_BASE));
-    elseif (key($_GET) == 'hamper')
-      if (current($_GET) == 'entry' || empty(current($_GET)))
-        require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
-      elseif ((int) current($_GET))
-        require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
-      else
-        exit(header('Location: ' . APP_URL_BASE));
-    elseif (key($_GET) == 'reports') {
-      if (current($_GET) == '' || !empty(current($_GET))) {
-        require APP_PATH . APP_BASE['src'] . 'reports.php';
-      }
-    } elseif (key($_GET) == 'queue') {
-      if (current($_GET) == '' || !empty(current($_GET))) {
-        require APP_PATH . APP_BASE['src'] . 'queue.php';
-      }
+    switch (key($_GET)) {
+      case '':
+        require APP_PATH . APP_BASE['src'] . 'index.php';
+        break;
+      case 'search':
+        switch (current($_GET)) {
+          case 'clients':
+            require APP_PATH . APP_BASE['src'] . 'search_client.php';
+            break;
+          case 'hampers':
+            require APP_PATH . APP_BASE['src'] . 'search_hamper.php';
+            break;
+          default:
+            exit(header('Location: ' . APP_URL_BASE));
+        }
+        break;
+      case 'client':
+        if (current($_GET) == 'entry' || empty(current($_GET)))
+          require APP_PATH . APP_BASE['src'] . 'entry_client.php';
+        elseif (current($_GET) == 'children')
+          require APP_PATH . APP_BASE['src'] . 'client_children.php';
+        elseif (current($_GET) == 'duplicate')
+          require APP_PATH . APP_BASE['src'] . 'client_duplicate.php';
+        elseif ((int) current($_GET))
+          require APP_PATH . APP_BASE['src'] . 'entry_client.php';
+        else
+          exit(header('Location: ' . APP_URL_BASE));
+        break;
+      case 'hamper':
+        if (current($_GET) == 'entry' || empty(current($_GET)))
+          require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
+        elseif ((int) current($_GET))
+          require APP_PATH . APP_BASE['src'] . 'entry_hamper.php';
+        else
+          exit(header('Location: ' . APP_URL_BASE));
+        break;
+      case 'reports':
+        if (current($_GET) == '' || !empty(current($_GET))) {
+          require APP_PATH . APP_BASE['src'] . 'reports.php';
+        }
+        break;
+      case 'queue':
+        if (current($_GET) == '' || !empty(current($_GET))) {
+          require APP_PATH . APP_BASE['src'] . 'queue.php';
+        }
+        break;
+      case 'debug':
+        require APP_PATH . APP_BASE['src'] . 'debug.php';
+        break;
+      case 'database':
+        switch (current($_GET)) {
+          case 'patient':
+            require APP_PATH . APP_BASE['src'] . 'db_patient.php';
+            break;
+          default:
+            exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
+              key($_GET) => 'patient'
+            ])));
+        }
+        break;
     }
-    elseif (key($_GET) == 'debug')
-      require APP_PATH . APP_BASE['src'] . 'debug.php';  
-/*
-    elseif (key($_GET) == 'import') {
-      if (current($_GET) == 'csv') {
-        include __DIR__ . '/../src/import_csv.php';
-      }
-    }
-*/        
-/*
-    elseif (key($_GET) == 'print') {
-      if (current($_GET) == 'labels') {
-        include __DIR__ . '/../src/print_labels.php';
-      }
-    }
-*/
-    elseif (key($_GET) == 'database')
-      if (current($_GET) == 'patient')
-        require APP_PATH . '/src/db_patient.php';
-/*    elseif (current($_GET) == 'archive')
-        require APP_PATH . '/src/db_archive.php';   */
-      else
-        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
-          key($_GET) => 'patient'
-        ))));
 
 
 /*
-      exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+      exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
         'search' => ''
-      ))));
+      ])));
 */
   break;
 }

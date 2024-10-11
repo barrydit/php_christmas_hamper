@@ -96,10 +96,9 @@ td {
       </tbody>
     </table>
   </div>
-<?php
-if (!extension_loaded('gd')) { ?>
+<?php if (!empty(APP_ERRORS)) { ?>
   <div style="width: 100%; background-color: #F08A80;">
-    <div style="padding: 2px; width: 696px; margin: auto; background-color: #E8CFC0;">PHP Extension: <b>gd</b> must be loaded inorder to export to xls (PHPSpreadsheet).</div>
+    <div style="padding: 2px; width: 696px; margin: auto; background-color: #E8CFC0;"><?= APP_ERRORS[array_key_last(APP_ERRORS)]; ?></div>
   </div>
 <?php } ?>
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
@@ -115,7 +114,7 @@ if (!extension_loaded('gd')) { ?>
   
  
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query(['search' => 'clients'])?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -128,6 +127,16 @@ if (!extension_loaded('gd')) { ?>
             <option value="" />
           </datalist>&nbsp;&nbsp;&nbsp;
         </div>
+
+        <div style="display: table-cell; text-align: left; padding-left: 10px;">
+          <label>Phone:&nbsp;&nbsp;
+            <input id="phone_numb" type="tel" name="q" list="phone_numbs" placeholder="(123) 456-7890"  value=""  autofocus="" oninput="phone_numb_input()" inputmode="text" disabled /> <!-- onclick="this.form.submit();" -->
+          </label>
+          <datalist id="phone_numbs">
+            <option value="" />
+          </datalist>&nbsp;&nbsp;&nbsp;
+        </div>
+
         <div style="display: tale-cell; text-align: right; padding-right: 25px;">
           <input type="submit" value="  Search  " style="border: none; cursor: pointer; box-shadow: 0 2px 5px 0 rgb(94, 158, 214); min-width: 90px; border-radius: 2px; padding: 2px 4px; outline: none; border: 1px solid  rgb (94, 158, 214); border-radius:0;" />
         </div>
@@ -177,9 +186,10 @@ FROM `clients` AS c
                              )
 WHERE h2.id IS NULL
 ORDER BY h1.`id` DESC LIMIT 5;
-HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
+HERE
+); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-$stmt->execute(array());
+$stmt->execute([]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>  
     <table style="margin: 0px auto 15px auto; width: 675px;">
@@ -313,7 +323,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query(['search' => 'clients'])?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

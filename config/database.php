@@ -8,22 +8,20 @@ $dbpass = ''; //password
 $dbname = 'christmas_hamper';
 $dbbackup['path'] = dirname(__FILE__) . '/backup/';
 $dbbackup['file'] = $dbname."___(".date('Y-m-d')."_".date('H-i-s').").sql";
-$dbtables = array(
+$dbtables = [
   'users', 
   'clients', 
   'hampers'
-);
+];
 */
 /**/
 
-require_once(APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
-
-$dotenv = Dotenv\Dotenv::createImmutable(APP_BASE_PATH, '.env.' . APP_ENV);
-$dotenv->safeLoad();
+//$dotenv = Dotenv\Dotenv::createImmutable(APP_PATH, '.env' /*. APP_ENV*/);
+//$dotenv->safeLoad();
 
 if (empty($_ENV)) {
   $_ENV['DB_UNAME'] = 'root';
-  $_ENV['DB_PWORD'] = '';
+  $_ENV['DB_PWORD'] = 'password';
 }
 
 define('DB_HOST', 'localhost');
@@ -32,11 +30,11 @@ define('DB_UNAME', $_ENV['DB_UNAME']);
 define('DB_PWORD', $_ENV['DB_PWORD']);
 
 define('DB_NAME', ['christmas_hamper']);
-define('DB_TABLES', array(
-    0=>'users', 
-    1=>'clients',   
-    2=>'hampers'
-));
+define('DB_TABLES', [
+  0 => 'users',
+  1 => 'clients',
+  2 => 'hampers'
+]);
 
 define('DB_BACK_PATH', APP_PATH . APP_BASE['database'] . 'backup' . DIRECTORY_SEPARATOR);
 define('DB_BACK_FILE', DB_NAME[0].'___('. date('Y') .').sql'); // date('Y-m-d').'_'.date('H-i-s')
@@ -112,7 +110,7 @@ foreach(DB_TABLES as $key => $table) {
         }
       }
       mkdir(DB_BACK_PATH, 0700, true);
-      file_put_contents(APP_PATH . '.env.development', "DB_UNAME=root\nDB_PWORD=");
+      file_put_contents(APP_PATH . '.env', "DB_UNAME=root\nDB_PWORD=");
     } else {
       $command = 'mysql'
       . ' --host=' . DB_HOST

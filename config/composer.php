@@ -2,8 +2,11 @@
 
 // https://stackoverflow.com/questions/38396046/how-to-run-composer-update-on-php-server
 
-define('HOME_DIRECTORY', APP_BASE_PATH . 'composer' );
-define('COMPOSER_INITED', file_exists(APP_BASE_PATH . 'vendor'));
+
+//die(var_dump(get_required_files()));
+
+define('HOME_DIRECTORY', APP_PATH . 'composer' );
+define('COMPOSER_INITED', file_exists(APP_PATH . 'vendor'));
 
 set_time_limit(100);
 ini_set('memory_limit',-1);
@@ -11,16 +14,16 @@ ini_set('memory_limit',-1);
 if (!getenv('HOME') && !getenv('COMPOSER_HOME'))
   putenv("COMPOSER_HOME=".HOME_DIRECTORY);
 
-
-ini_set('phar.readonly',0);
-if (!file_exists('composer')) {
-  if (!is_file(APP_BASE_PATH . 'composer.phar'))
-    file_put_contents(APP_BASE_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
-  (new Phar("composer.phar"))->extractTo("./composer");
+if (!file_exists(HOME_DIRECTORY)) {
+  ini_set('phar.readonly',0) or $errors['phar.readonly'] = 'phar.readyonly Must be set to false.';
+  if (!is_dir(APP_PATH . 'composer')) {
+    if (!is_file(APP_PATH . 'composer.phar'))
+      file_put_contents(APP_PATH . 'composer.phar', file_get_contents('https://getcomposer.org/download/latest-stable/composer.phar'));
+    (new Phar("composer.phar"))->extractTo("./composer");
+  }
 }
-
 //This requires the phar to have been extracted successfully.
-require_once ('composer/vendor/autoload.php');
+require_once APP_PATH . 'composer/vendor/autoload.php';
 
 //Use the Composer classes
 use Composer\Console\Application;
@@ -28,7 +31,7 @@ use Composer\Command\UpdateCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 
 defined('COMPOSER_AUTOLOAD_PATH')
-  or define("COMPOSER_AUTOLOAD_PATH", APP_BASE_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
+  or define("COMPOSER_AUTOLOAD_PATH", APP_PATH . 'vendor' . DIRECTORY_SEPARATOR); // basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' .
 
 if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
 
@@ -38,7 +41,7 @@ if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
 
 //Create the commands
 //$args = array('command' => 'self-update');
-  $args = array('command' => 'update');
+  $args = ['command' => 'update'];
 //$args = array('command' => 'config');
 
   if(!file_exists('vendor')) { 
@@ -56,6 +59,7 @@ if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
   $application = new Application();
   $application->setAutoExit(false);
   $application->setCatchExceptions(false);
+
   try {
   //Running commdand php.ini allow_url_fopen=1 && proc_open() function available
     $application->run($input);
@@ -76,3 +80,4 @@ if (!is_dir(COMPOSER_AUTOLOAD_PATH)) {
 */
   die(header('Location: http://' . APP_URL_BASE));
 }
+

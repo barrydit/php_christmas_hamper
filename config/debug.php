@@ -1,21 +1,21 @@
 <?php
 
-require_once('session.php');
-require_once('functions.php');
+//require_once('session.php');
+require_once 'functions.php';
 
-$files = array(/* 0 => array('path', 'filesize') */);
+$files = [/* 0 => array('path', 'filesize') */];
 
 foreach (glob("config/*.php") as $filename) {
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("database/*.sql") as $filename) {
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("public/*.php") as $filename) {
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 foreach (glob("src/*.php") as $filename) {
-    $files[] = array('path'=>$filename, 'filesize' => filesize($filename) );
+    $files[] = ['path' => $filename, 'filesize' => filesize($filename)];
 }
 
 $total_files = 0;
@@ -171,7 +171,7 @@ if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) { // ($_SERVER["SCRIPT
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Patient Clinic Files -- Debug Window</title>
     
-    <base href="<?=(!is_array(APP_URL) ? APP_URL : APP_URL_BASE)?>">
+    <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE?>">
     
     <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>favicon.ico" />
 
@@ -217,9 +217,9 @@ if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) { // ($_SERVER["SCRIPT
   echo 'Defined Constants [User]: ';
   print_r(get_defined_constants(true)['user']); // [Core] | [pcre]
 
-  echo '$_SERVER["HTTPS"]: ' . ((isset($_SERVER['HTTPS'])) ? $_SERVER['HTTPS'] : 'off') . "\n";
+  echo '$_SERVER["HTTPS"]: ' . ($_SERVER['HTTPS'] ?? 'off') . "\n";
   echo '$_SERVER["REQUEST_URI"]: ' . $_SERVER['REQUEST_URI'] . "\n";
-  echo '$_SERVER["HTTP_REFERER"]: ' . ((isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : '&lt;none&gt;') . "\n\n";
+  echo '$_SERVER["HTTP_REFERER"]: ' . ($_SERVER['HTTP_REFERER'] ?? '&lt;none&gt;') . "\n\n";
 
   echo 'Included files: ';
   print_r(get_included_files());
@@ -252,48 +252,48 @@ if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) { // ($_SERVER["SCRIPT
     die('PHP_SELF: ' . $_SERVER['PHP_SELF']);
 */
 
-  $indicesServer = array(
-    'PHP_SELF',
-    'argv',
-    'argc',
-    'GATEWAY_INTERFACE',
-    'SERVER_ADDR',
-    'SERVER_NAME',
-    'SERVER_SOFTWARE',
-    'SERVER_PROTOCOL',
-    'REQUEST_METHOD',
-    'REQUEST_TIME',
-    'REQUEST_TIME_FLOAT',
-    'QUERY_STRING',
-    'DOCUMENT_ROOT',
-    'HTTP_ACCEPT',
-    'HTTP_ACCEPT_CHARSET',
-    'HTTP_ACCEPT_ENCODING',
-    'HTTP_ACCEPT_LANGUAGE',
-    'HTTP_CONNECTION',
-    'HTTP_HOST',
-    'HTTP_REFERER',
-    'HTTP_USER_AGENT',
-    'HTTPS',
-    'REMOTE_ADDR',
-    'REMOTE_HOST',
-    'REMOTE_PORT',
-    'REMOTE_USER',
-    'REDIRECT_REMOTE_USER',
-    'SCRIPT_FILENAME',
-    'SERVER_ADMIN',
-    'SERVER_PORT',
-    'SERVER_SIGNATURE',
-    'PATH_TRANSLATED',
-    'SCRIPT_NAME',
-    'REQUEST_URI',
-    'PHP_AUTH_DIGEST',
-    'PHP_AUTH_USER',
-    'PHP_AUTH_PW',
-    'AUTH_TYPE',
-    'PATH_INFO',
-    'ORIG_PATH_INFO'
-  );
+  $indicesServer = [
+      'PHP_SELF',
+      'argv',
+      'argc',
+      'GATEWAY_INTERFACE',
+      'SERVER_ADDR',
+      'SERVER_NAME',
+      'SERVER_SOFTWARE',
+      'SERVER_PROTOCOL',
+      'REQUEST_METHOD',
+      'REQUEST_TIME',
+      'REQUEST_TIME_FLOAT',
+      'QUERY_STRING',
+      'DOCUMENT_ROOT',
+      'HTTP_ACCEPT',
+      'HTTP_ACCEPT_CHARSET',
+      'HTTP_ACCEPT_ENCODING',
+      'HTTP_ACCEPT_LANGUAGE',
+      'HTTP_CONNECTION',
+      'HTTP_HOST',
+      'HTTP_REFERER',
+      'HTTP_USER_AGENT',
+      'HTTPS',
+      'REMOTE_ADDR',
+      'REMOTE_HOST',
+      'REMOTE_PORT',
+      'REMOTE_USER',
+      'REDIRECT_REMOTE_USER',
+      'SCRIPT_FILENAME',
+      'SERVER_ADMIN',
+      'SERVER_PORT',
+      'SERVER_SIGNATURE',
+      'PATH_TRANSLATED',
+      'SCRIPT_NAME',
+      'REQUEST_URI',
+      'PHP_AUTH_DIGEST',
+      'PHP_AUTH_USER',
+      'PHP_AUTH_PW',
+      'AUTH_TYPE',
+      'PATH_INFO',
+      'ORIG_PATH_INFO'
+    ];
 
   echo '<table cellpadding="10">';
   foreach ($indicesServer as $arg) {
@@ -342,4 +342,4 @@ if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) { // ($_SERVER["SCRIPT
     <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/vendor/jquery/jquery-3.5.1.min.js"></script>
   </body>
 </html>
-<?php } ?>
+<?php } //die();

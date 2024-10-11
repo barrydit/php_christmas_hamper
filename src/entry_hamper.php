@@ -5,14 +5,14 @@ if (isset($_REQUEST['hamper']))
   else if (is_string($_REQUEST['hamper']))
     if (ctype_digit($_REQUEST['hamper'])) {
       $stmt = $pdo->prepare("SELECT `id`, `created_date` FROM `hampers` WHERE `id` = :id LIMIT 1;");
-      $stmt->execute(array(
+      $stmt->execute([
         ":id" => filter_var($_REQUEST['hamper'], FILTER_VALIDATE_INT)
-      ));
+      ]);
       $row = $stmt->fetch();
       if (!empty($row))
         $_SESSION['hamper_id'] = $_REQUEST['hamper'] = filter_var($_REQUEST['hamper'], FILTER_VALIDATE_INT);
       else 
-        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array())));
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([])));
     }
   else
     $_SESSION['hamper_id'] = intval($_REQUEST['hamper']);
@@ -25,43 +25,43 @@ switch ($_SERVER['REQUEST_METHOD']) {
     //die(var_dump($_POST));
 
     $stmt = $pdo->prepare("SELECT `id`, `hamper_no` FROM `hampers` WHERE `id` = :hamper_id LIMIT 1;");
-    $stmt->execute(array(
+    $stmt->execute([
       ":hamper_id" => $_POST['hamper_id']
-    ));
+    ]);
     $row = $stmt->fetch();
 
     if (!empty($row)) {
       if (!empty($_POST["hamper_delete"]) && $_POST['hamper_delete'] == 'yes') {
         $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE `hampers`.`id` = :hamper_id');
-        $stmt->execute(array(
+        $stmt->execute([
           ":hamper_id" => $_POST["hamper_id"]
-        ));
+        ]);
 
-        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
           'hamper' => $_POST['hamper_id']
-        ))));
+        ])));
 
       }
         
       $stmt = $pdo->prepare("UPDATE `hampers` SET `hamper_no` = :hamper_no, `transport_method` = :transport_method, `address` = :address, `attention` = :attention WHERE `hampers`.`id` = :hamper_id;");
-      $stmt->execute(array(
+      $stmt->execute([
         ':hamper_no' => (!empty($_POST['hamper_no']) ? $_POST['hamper_no'] : $row['hamper_no']),
         ':transport_method' => (!empty($_POST['transport_method']) ? $_POST['transport_method'] : ''),
         ':address' => (!empty($_POST['address']) ? (!empty($_POST['transport_method'] && $_POST['transport_method'] != 'DELIVERY') ? '' : $_POST['address']) : ''),
         ':attention' => (!empty($_POST['attention']) ? $_POST['attention'] : ''),
         ':hamper_id' => $_POST['hamper_id']
-      ));
+      ]);
     }
     
-    exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+    exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
       'hamper' => $_SESSION['hamper_id']
-    ))));
+    ])));
     break;
   case 'GET':
     $stmt = $pdo->prepare("SELECT c.`id` AS c_id, c.`last_name`, c.`first_name`, h.* FROM `hampers` as h LEFT JOIN `clients` as c ON h.`client_id` = c.`id` WHERE h.`id` = :id ORDER BY c.`id` ASC;"); // WHERE `id` = :id;
-    $stmt->execute(array(
+    $stmt->execute([
       ":id" => $_SESSION['hamper_id']
-    ));
+    ]);
     $row_hamper = $stmt->fetch();
     break;
 }
@@ -137,7 +137,7 @@ td {
   </div>
   
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form method="POST" action="<?='?' . http_build_query(['search' => 'clients'])?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -158,7 +158,7 @@ td {
 
   <div class="overflowAuto" style="border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px;">
     <div style="padding: 0px 20px 10px 20px;">
-      <form action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
+      <form action="<?='?' . http_build_query(array_merge(APP_QUERY, []), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
 <?php if (!empty($row_hamper['id']) && is_int((int) $row_hamper['id'])) { ?>
         <input type="hidden" name="hamper_id" value="<?=(!empty($row_hamper['id']) ? $row_hamper['id'] : '') ?>" />
 <?php } ?>
@@ -192,9 +192,9 @@ td {
           <div style="display: inline-block; width: 200px; margin-left: 20px;">
 <?php
   $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE YEAR(`created_date`) = :created_date ORDER BY `id` DESC LIMIT 1;');
-  $stmt->execute(array(
-    ':created_date' => date('Y')
-  ));
+  $stmt->execute([
+  ':created_date' => date('Y')
+]);
   $row = $stmt->fetch();
   if (!empty($row)) {
     list($alpha,$numeric) = sscanf($row['hamper_no'], "%[A-Z]%d");
@@ -276,7 +276,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query(['search' => 'clients'])?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

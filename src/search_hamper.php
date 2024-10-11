@@ -1,5 +1,5 @@
 <?php
-if (!defined('APP_BASE_PATH')) exit('No direct script access allowed');
+if (!defined('APP_PATH')) exit('No direct script access allowed');
 
 //require(COMPOSER_AUTOLOAD_PATH.'autoload.php'); // composer dump -o
 
@@ -18,8 +18,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
     //$stmt = $pdo->prepare('SELECT h.`id` AS h_id, h.`client_id`, h.`hamper_no`, h.`transport_method`, h.`phone_number_1`, h.`address`, h.`group_size`, c.`last_name`, c.`first_name` FROM `clients` as c LEFT JOIN `hampers` as h ON c.`id` = h.`client_id` WHERE YEAR(h.`created_date`) = "' . (empty($_GET['date']) ? date('Y') : date_parse($_GET['date'].'-01-01')['year']) . '"' . (!empty($_GET['group_size']) ? ' AND h.`group_size` = "' . $_GET['group_size'] . '"' : '') . ' ORDER BY h.`id` DESC;');
 
 
-    $created_date = (empty($_GET['date']) ? date('Y') : date_parse($_GET['date'].'-01-01')['year']);
-    $group_size = (empty($_GET['group_size']) ? '' : ' AND h1.`group_size` = "' . $_GET['group_size'] . '"');
+    $created_date = empty($_GET['date']) ? date('Y') : date_parse($_GET['date'] . '-01-01')['year'];
+    $group_size = empty($_GET['group_size']) ? '' : ' AND h1.`group_size` = "' . $_GET['group_size'] . '"';
     
     $stmt = $pdo->prepare(<<<HERE
 SELECT h1.`id`                    AS h_id,
@@ -49,11 +49,12 @@ FROM `clients` AS c
                              )
 WHERE h2.id IS NULL AND YEAR(h1.`created_date`) = {$created_date} {$group_size}
 ORDER BY h1.`id`;
-HERE);
+HERE
+);
 
     //die($stmt->debugDumpParams());
 
-    $stmt->execute(array());
+    $stmt->execute([]);
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -105,18 +106,18 @@ HERE);
         $rowCount = 2;
 
         while($row = array_shift($rows)) {
-          $sheet->setCellValue('A' . $rowCount, $row['hamper_no']);
-          $sheet->setCellValue('B' . $rowCount, $row['transport_method']);
-          $sheet->setCellValue('C' . $rowCount, $row['group_size']);
-          $sheet->setCellValue('D' . $rowCount, $row['last_name'] . ', ' . $row['first_name']);
-          $sheet->setCellValue('E' . $rowCount, $row['phone_number_1']);
-          $sheet->setCellValue('F' . $rowCount, $row['address']);
+          $sheet->setCellValue("A$rowCount", $row['hamper_no']);
+          $sheet->setCellValue("B$rowCount", $row['transport_method']);
+          $sheet->setCellValue("C$rowCount", $row['group_size']);
+          $sheet->setCellValue("D$rowCount", $row['last_name'] . ', ' . $row['first_name']);
+          $sheet->setCellValue("E$rowCount", $row['phone_number_1']);
+          $sheet->setCellValue("F$rowCount", $row['address']);
           $rowCount++;
         }
       
-        $spreadsheet->getActiveSheet()->getStyle('D2:D' . $rowCount)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $spreadsheet->getActiveSheet()->getStyle("D2:D$rowCount")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        $spreadsheet->getActiveSheet()->getStyle('E2:E' . $rowCount)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle("E2:E$rowCount")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         for ($i = 'A'; $i != $spreadsheet->getActiveSheet()->getHighestColumn(); $i++) {
           $spreadsheet->getActiveSheet()->getColumnDimension($i)->setAutoSize(TRUE);
@@ -176,48 +177,54 @@ HERE);
 
         $spreadsheet->getActiveSheet()->setTitle('XLFAMILY');
 
+        $rowCount = [];
         $rowCount['single'] = 2;
         $rowCount['couple'] = 2;
         $rowCount['family'] = 2;
         $rowCount['xlfamily'] = 2;
 
         while($row = array_shift($rows)) {
-          if ($row['group_size'] == 'SINGLE') {
-            $sheet = $spreadsheet->setActiveSheetIndex(0);
-            $sheet->setCellValue('A' . $rowCount['single'], $row['hamper_no']);
-            $sheet->setCellValue('B' . $rowCount['single'], $row['transport_method']);
-            $sheet->setCellValue('C' . $rowCount['single'], $row['group_size']);
-            $sheet->setCellValue('D' . $rowCount['single'], $row['last_name'] . ', ' . $row['first_name']);
-            $sheet->setCellValue('E' . $rowCount['single'], $row['phone_number_1']);
-            $sheet->setCellValue('F' . $rowCount['single'], $row['address']);
-            $rowCount['single']++;
-          } elseif ($row['group_size'] == 'COUPLE') {
-            $sheet = $spreadsheet->setActiveSheetIndex(1);
-            $sheet->setCellValue('A' . $rowCount['couple'], $row['hamper_no']);
-            $sheet->setCellValue('B' . $rowCount['couple'], $row['transport_method']);
-            $sheet->setCellValue('C' . $rowCount['couple'], $row['group_size']);
-            $sheet->setCellValue('D' . $rowCount['couple'], $row['last_name'] . ', ' . $row['first_name']);
-            $sheet->setCellValue('E' . $rowCount['couple'], $row['phone_number_1']);
-            $sheet->setCellValue('F' . $rowCount['couple'], $row['address']);
-            $rowCount['couple']++;
-          } elseif ($row['group_size'] == 'FAMILY') {
-            $sheet = $spreadsheet->setActiveSheetIndex(2);
-            $sheet->setCellValue('A' . $rowCount['family'], $row['hamper_no']);
-            $sheet->setCellValue('B' . $rowCount['family'], $row['transport_method']);
-            $sheet->setCellValue('C' . $rowCount['family'], $row['group_size']);
-            $sheet->setCellValue('D' . $rowCount['family'], $row['last_name'] . ', ' . $row['first_name']);
-            $sheet->setCellValue('E' . $rowCount['family'], $row['phone_number_1']);
-            $sheet->setCellValue('F' . $rowCount['family'], $row['address']);
-            $rowCount['family']++;
-          } elseif ($row['group_size'] == 'XLFAMILY') {
-            $sheet = $spreadsheet->setActiveSheetIndex(3);
-            $sheet->setCellValue('A' . $rowCount['xlfamily'], $row['hamper_no']);
-            $sheet->setCellValue('B' . $rowCount['xlfamily'], $row['transport_method']);
-            $sheet->setCellValue('C' . $rowCount['xlfamily'], $row['group_size']);
-            $sheet->setCellValue('D' . $rowCount['xlfamily'], $row['last_name'] . ', ' . $row['first_name']);
-            $sheet->setCellValue('E' . $rowCount['xlfamily'], $row['phone_number_1']);
-            $sheet->setCellValue('F' . $rowCount['xlfamily'], $row['address']);
-            $rowCount['xlfamily']++;
+          switch ($row['group_size']) {
+            case 'SINGLE':
+              $sheet = $spreadsheet->setActiveSheetIndex(0);
+              $sheet->setCellValue('A' . $rowCount['single'], $row['hamper_no']);
+              $sheet->setCellValue('B' . $rowCount['single'], $row['transport_method']);
+              $sheet->setCellValue('C' . $rowCount['single'], $row['group_size']);
+              $sheet->setCellValue('D' . $rowCount['single'], $row['last_name'] . ', ' . $row['first_name']);
+              $sheet->setCellValue('E' . $rowCount['single'], $row['phone_number_1']);
+              $sheet->setCellValue('F' . $rowCount['single'], $row['address']);
+              $rowCount['single']++;
+              break;
+            case 'COUPLE':
+              $sheet = $spreadsheet->setActiveSheetIndex(1);
+              $sheet->setCellValue('A' . $rowCount['couple'], $row['hamper_no']);
+              $sheet->setCellValue('B' . $rowCount['couple'], $row['transport_method']);
+              $sheet->setCellValue('C' . $rowCount['couple'], $row['group_size']);
+              $sheet->setCellValue('D' . $rowCount['couple'], $row['last_name'] . ', ' . $row['first_name']);
+              $sheet->setCellValue('E' . $rowCount['couple'], $row['phone_number_1']);
+              $sheet->setCellValue('F' . $rowCount['couple'], $row['address']);
+              $rowCount['couple']++;
+              break;
+            case 'FAMILY':
+              $sheet = $spreadsheet->setActiveSheetIndex(2);
+              $sheet->setCellValue('A' . $rowCount['family'], $row['hamper_no']);
+              $sheet->setCellValue('B' . $rowCount['family'], $row['transport_method']);
+              $sheet->setCellValue('C' . $rowCount['family'], $row['group_size']);
+              $sheet->setCellValue('D' . $rowCount['family'], $row['last_name'] . ', ' . $row['first_name']);
+              $sheet->setCellValue('E' . $rowCount['family'], $row['phone_number_1']);
+              $sheet->setCellValue('F' . $rowCount['family'], $row['address']);
+              $rowCount['family']++;
+              break;
+            case 'XLFAMILY':
+              $sheet = $spreadsheet->setActiveSheetIndex(3);
+              $sheet->setCellValue('A' . $rowCount['xlfamily'], $row['hamper_no']);
+              $sheet->setCellValue('B' . $rowCount['xlfamily'], $row['transport_method']);
+              $sheet->setCellValue('C' . $rowCount['xlfamily'], $row['group_size']);
+              $sheet->setCellValue('D' . $rowCount['xlfamily'], $row['last_name'] . ', ' . $row['first_name']);
+              $sheet->setCellValue('E' . $rowCount['xlfamily'], $row['phone_number_1']);
+              $sheet->setCellValue('F' . $rowCount['xlfamily'], $row['address']);
+              $rowCount['xlfamily']++;
+              break;
           }
         }
 
@@ -323,7 +330,7 @@ HERE);
 
 //'SELECT `id`, `client_id`, `hamper_no`, `transport_method`, `phone_number_1`, `address`, `group_size` FROM `hampers` WHERE YEAR(`created_date`) = "' . (empty($_GET['date']) ? date('Y') : $_GET['date']) . '"' . (!empty($_GET['group_size']) ? ' AND `group_size` = "' . $_GET['group_size'] . '"' : '') . ' ORDER BY `id` DESC;'
 
-    $stmt->execute(array());
+    $stmt->execute([]);
 
     //die($stmt->debugDumpParams());
 
@@ -346,10 +353,10 @@ HERE);
 
   <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -422,10 +429,10 @@ td {
   </div>
 <?php
 
-$search = (!empty($_GET['search']) ? $_GET['search'] : '');
-$date = (!empty($_GET['date']) ? $_GET['date'] : '');
-$transport_method = (!empty($_GET['transport_method']) ? $_GET['transport_method'] : '');
-$group_size = (!empty($_GET['group_size']) ? $_GET['group_size'] : '');
+$search = !empty($_GET['search']) ? $_GET['search'] : '';
+$date = !empty($_GET['date']) ? $_GET['date'] : '';
+$transport_method = !empty($_GET['transport_method']) ? $_GET['transport_method'] : '';
+$group_size = !empty($_GET['group_size']) ? $_GET['group_size'] : '';
 
 ?>  
   <div style="position: relative; padding-top: 10px; width: 700px; margin: auto; background-color: #EEE0F2;">
@@ -464,15 +471,15 @@ foreach($_GET as $key => $val) {
 }
 
 $_GET = ['search' => $search];
-(!empty($date) ? $_GET = $_GET + (array) ['date' => $date] : '');
-(!empty($group_size) ? $_GET = $_GET + (array) ['group_size' => $group_size] : '');
-$_GET = $_GET + (array) ['transport_method' => ''];
+(!empty($date) ? $_GET += (array) ['date' => $date] : '');
+(!empty($group_size) ? $_GET += (array) ['group_size' => $group_size] : '');
+$_GET += (array) ['transport_method' => ''];
 ?>
         <label for="transport_method">PU/D:</label>
         <select id="transport_method" onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&amp;');">
           <option value="" selected=""></option>
-          <option value="PICK-UP" <?=(!empty($transport_method) && $transport_method == 'PICK-UP' ? 'selected="selected"' : '' )?>>Pick-up</option>
-          <option value="DELIVERY" <?=(!empty($transport_method) && $transport_method == 'DELIVERY' ? 'selected="selected"' : '' )?>>Delivery</option>
+          <option value="PICK-UP" <?= !empty($transport_method) && $transport_method == 'PICK-UP' ? 'selected="selected"' : '' ?>>Pick-up</option>
+          <option value="DELIVERY" <?= !empty($transport_method) && $transport_method == 'DELIVERY' ? 'selected="selected"' : '' ?>>Delivery</option>
         </select>
         </div>
         <div style="display: inline;">
@@ -529,10 +536,10 @@ $_GET = $_GET + (array) ['date' => ''];
             <option value=""></option>
 <?php
   $stmt = $pdo->prepare('SELECT DISTINCT YEAR(`created_date`) FROM `hampers` ORDER BY `created_date` DESC;');
-  $stmt->execute(array());
+  $stmt->execute([]);
 
   while ($row_dates = $stmt->fetch()) {
-    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"'. (!empty($date) && $date == $row_dates['YEAR(`created_date`)'] ? '' : ' selected="selected"') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
+    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"'. (empty($date) && $date != $row_dates['YEAR(`created_date`)'] ? '' : ' selected="selected"') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
   }
 ?>
           </select>
@@ -580,7 +587,7 @@ if (!empty($rows)) {
 <?php }
 } else {
     $stmt = $pdo->prepare('ALTER TABLE hampers AUTO_INCREMENT=1;');
-    $stmt->execute(array());
+    $stmt->execute([]);
 ?> 
       <tr style="text-indent: 3px;">
         <td></td>
@@ -595,8 +602,8 @@ if (!empty($rows)) {
     </table>
   </div>
   
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

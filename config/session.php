@@ -16,7 +16,7 @@ defined('SESSION_LIFETIME')
 
 ini_set('session.save_path', SESSION_SAVE_PATH);
 
-$_SESSIONS = array();
+$_SESSIONS = [];
 
 /*
 if (ini_get("session.use_cookies"))
@@ -52,7 +52,7 @@ function sess_serialize($array, $safe = true) {
 }
 
 function sess_unserialize($str_data) {
-  $session = array();
+  $session = [];
   while ($i = strpos($str_data, '|'))
   {
     $k = substr($str_data, 0, $i);
@@ -126,7 +126,7 @@ foreach (array_keys($_SESSIONS) as $session_id) {
 }
 
 foreach (glob(APP_BASE['session'] . 'sess_*') as $filename) {
-  $session = sess_unserialize(file_get_contents(APP_PATH . APP_BASE['session'] . basename($filename), true)); //array();
+  $session = sess_unserialize(file_get_contents(APP_PATH . APP_BASE['session'] . basename($filename), true)); // [];
   $session_id = substr(basename($filename), 5);
   if (!empty($session)) {
     if (!array_key_exists($session_id, $_SESSIONS)) {
@@ -180,19 +180,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET')
 if ((!defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? TRUE : FALSE) : TRUE))
   switch ($_SERVER['REQUEST_METHOD']) {
     default:
-      if (key($_GET) == 'session')
+      if (key($_GET) == 'session') {
         if (in_array($_GET['session'], $_SESSIONS)) {
           $_SESSIONS[session_id()]['patient_id'] = $_SESSIONS[$_GET['session']]['patient_id'];
           $_SESSIONS[session_id()]['user_id'] = $_SESSIONS[$_GET['session']]['user_id'];
         } else
           exit(header('Location: ' . APP_URL_BASE . '?login'));
-      elseif (key($_GET) == 'login')
+      } elseif (key($_GET) == 'login') {
+        
         // $_SESSION['enable_ssl'] = (isset($_POST['enable_ssl']) ? true : (defined('APP_HTTPS') ? false : true));
         if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) // $_SESSION['user_id'] >= 0     
           exit(header('Location: ' . APP_URL_BASE));
         else
           exit(require APP_PATH . APP_BASE['public'] . 'login.php');
-      elseif (key($_GET) == 'logout')
+      } elseif (key($_GET) == 'logout')
         if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) // $_SESSION['user_id'] >= 0
           exit(require APP_PATH . APP_BASE['public'] . 'logout.php');
         else
@@ -204,7 +205,7 @@ if ((!defined('APP_DEBUG') ? define('APP_DEBUG', FALSE) . (APP_DEBUG == FALSE ? 
         if ((!isset($_SESSION['last_access'])?: time() - $_SESSION['last_access']) > SESSION_LIFETIME)
           if ($_SERVER['REQUEST_METHOD'] == "POST") break;
 
-        if (!isset($_SESSION['user_id']) || is_null($_SESSION['user_id']) || is_string($_SESSION['user_id']))
+        if (!isset($_SESSION['user_id']) && $_SESSION['user_id'] === 0 || is_string($_SESSION['user_id']))
           exit(header('Location: ' . APP_URL_BASE . '?login'));
       }
       break;

@@ -25,7 +25,7 @@ if (($handle = fopen(APP_PATH . "/resources/COUPLES_2021.csv", "r")) !== FALSE) 
     //echo "<p> $num fields in line $row: <br /></p>\n";
 
     $stmt = $pdo->prepare("INSERT IGNORE INTO `clients` (`id`, `last_name`, `first_name`, `phone_number_1`, `group_size`, `minor_children`, `active_status`, `modified_date`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($data[3]) ? trim($data[3]) : NULL),
       (!empty($data[2]) ? trim($data[2]) : NULL),
       (!empty($data[4]) ? preg_replace('#[ -]+#', '-', trim($data[4])) : ''),
@@ -34,13 +34,13 @@ if (($handle = fopen(APP_PATH . "/resources/COUPLES_2021.csv", "r")) !== FALSE) 
       '1',
       '2021-01-01',
       '2021-01-01'
-    ));
+    ]);
     
     $client_id = $pdo->lastInsertId();
 
 /* hamper_no, transport_method, first_name, last_name, phone_number, minor_children */
     $stmt = $pdo->prepare("INSERT INTO `hampers` (`id`, `client_id`, `hamper_no`, `transport_method`, `phone_number_1`, `group_size`, `minor_children`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($client_id) ? $client_id : NULL),
       (!empty($data[0]) ? trim($data[0]) : NULL),
       (!empty($data[1]) ? trim($data[1]) : ''),
@@ -48,15 +48,15 @@ if (($handle = fopen(APP_PATH . "/resources/COUPLES_2021.csv", "r")) !== FALSE) 
       'COUPLE',
       (!empty($data[5]) ? trim($data[5]) : ''),
       '2021-01-01'
-    ));
+    ]);
     
     $hamper_id = $pdo->lastInsertId();
     
     $stmt = $pdo->prepare("UPDATE `clients` SET `hamper_id` = :hamper_id WHERE `clients`.`id` = :id;");
-    $stmt->execute(array(
+    $stmt->execute([
       ":hamper_id" => (!empty($hamper_id) ? $hamper_id : NULL),
       ":id" => (!empty($client_id) ? $client_id : NULL)
-    ));
+    ]);
   }
   fclose($handle);
 }
@@ -69,7 +69,7 @@ if (($handle = fopen(APP_PATH . "/resources/FAMILIES_2021.csv", "r")) !== FALSE)
     //echo "<p> $num fields in line $row: <br /></p>\n";
 
     $stmt = $pdo->prepare("INSERT IGNORE INTO `clients` (`id`, `last_name`, `first_name`, `phone_number_1`, `group_size`, `minor_children`, `diet_vegetarian`, `diet_gluten_free`, `active_status`, `modified_date`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($data[4]) ? trim($data[4]) : NULL),
       (!empty($data[3]) ? trim($data[3]) : NULL),
       (!empty($data[5]) ? preg_replace('#[ -]+#', '-', trim($data[5])) : ''),
@@ -80,12 +80,12 @@ if (($handle = fopen(APP_PATH . "/resources/FAMILIES_2021.csv", "r")) !== FALSE)
       1,
       '2021-01-01',
       '2021-01-01'
-    ));
+    ]);
     
     $client_id = $pdo->lastInsertId();
 
     $stmt = $pdo->prepare("INSERT INTO `hampers` (`id`, `client_id`, `hamper_no`, `transport_method`, `phone_number_1`, `group_size`, `minor_children`, `diet_vegetarian`, `diet_gluten_free`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($client_id) ? $client_id : NULL),
       (!empty($data[0]) ? trim($data[0]) : NULL),
       (!empty($data[1]) ? trim($data[1]) : ''),
@@ -95,15 +95,15 @@ if (($handle = fopen(APP_PATH . "/resources/FAMILIES_2021.csv", "r")) !== FALSE)
       (!empty($data[7]) ? '1' : '0'),
       0,
       '2021-01-01'
-    ));
+    ]);
     
     $hamper_id = $pdo->lastInsertId();
     
     $stmt = $pdo->prepare("UPDATE `clients` SET `hamper_id` = :hamper_id WHERE `clients`.`id` = :id;");
-    $stmt->execute(array(
+    $stmt->execute([
       ":hamper_id" => (!empty($hamper_id) ? $hamper_id : NULL),
       ":id" => (!empty($client_id) ? $client_id : NULL)
-    ));
+    ]);
   }
   fclose($handle);
 }
@@ -116,7 +116,7 @@ if (($handle = fopen(APP_PATH . "/resources/SINGLES_2021.csv", "r")) !== FALSE) 
     //echo "<p> $num fields in line $row: <br /></p>\n";
 
     $stmt = $pdo->prepare("INSERT IGNORE INTO `clients` (`id`, `last_name`, `first_name`, `phone_number_1`, `group_size`, `active_status`, `modified_date`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($data[3]) ? trim($data[3]) : NULL),
       (!empty($data[2]) ? trim($data[2]) : NULL),
       (!empty($data[4]) ? preg_replace('#[ -]+#', '-', trim($data[4])) : ''),
@@ -124,13 +124,13 @@ if (($handle = fopen(APP_PATH . "/resources/SINGLES_2021.csv", "r")) !== FALSE) 
       '1',
       '2021-01-01',
       '2021-01-01'
-    ));
+    ]);
     
     $client_id = $pdo->lastInsertId();
 
 /* hamper_no, transport_method, first_name, last_name, phone_number*/
     $stmt = $pdo->prepare("INSERT INTO `hampers` (`id`, `client_id`, `hamper_no`, `transport_method`, `phone_number_1`, `group_size`, `minor_children`, `created_date`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?);");
-    $stmt->execute(array(
+    $stmt->execute([
       (!empty($client_id) ? $client_id : NULL),
       (!empty($data[0]) ? trim($data[0]) : NULL),
       (!empty($data[1]) ? trim($data[1]) : ''),
@@ -138,15 +138,15 @@ if (($handle = fopen(APP_PATH . "/resources/SINGLES_2021.csv", "r")) !== FALSE) 
       'SINGLE',
       (!empty($data[5]) ? trim($data[5]) : ''),
       '2021-01-01'
-    ));
+    ]);
     
     $hamper_id = $pdo->lastInsertId();
     
     $stmt = $pdo->prepare("UPDATE `clients` SET `hamper_id` = :hamper_id WHERE `clients`.`id` = :id;");
-    $stmt->execute(array(
+    $stmt->execute([
       ":hamper_id" => (!empty($hamper_id) ? $hamper_id : NULL),
       ":id" => (!empty($client_id) ? $client_id : NULL)
-    ));
+    ]);
   }
   fclose($handle);
 }

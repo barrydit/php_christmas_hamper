@@ -1,5 +1,5 @@
 <?php
-if (!defined('APP_BASE_PATH')) exit('No direct script access allowed');
+if (!defined('APP_PATH')) exit('No direct script access allowed');
 
 //require(COMPOSER_AUTOLOAD_PATH.'autoload.php'); // composer dump -o
 
@@ -14,13 +14,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $_POST['q'] = trim(preg_replace('/\t+/', '', $_POST['q']));
       $client_search = preg_split('/\s*,\s*/', $_POST['q']);
 
-      if (is_array($client_search)) {      //die($_POST['q']);
-
-      }
+      //if (is_array($client_search)) { }     //die($_POST['q']);
 
       if (!empty($_POST['phone_number'])) {
         preg_match('/([0-9]{3})-([0-9]{0,3})-([0-9]{0,4})/', $_POST['phone_number'], $matches);
-        $_POST['phone_number'] = $matches[1] . ($matches[2] != '' ? '-' . $matches[2] . ($matches[3] != '' ? '-' . $matches[3] : '') : '');
+        $_POST['phone_number'] = $matches[1] . ($matches[2] != '' ? "-$matches[2]" . ($matches[3] != '' ? "-$matches[3]" : '') : '');
         
         $stmt = $pdo->prepare(<<<HERE
 SELECT h1.`id`                                                  AS h_id,
@@ -57,9 +55,9 @@ WHERE h2.id IS NULL AND c.`phone_number_1` LIKE :phone_number
 ORDER BY c.`phone_number_1`;
 HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-        $stmt->execute(array(
+        $stmt->execute([
           ":phone_number" => (!empty($_POST['phone_number']) ? $_POST['phone_number'] . '%' : '%'),
-        ));
+        ]);
         
         break;
       }
@@ -73,10 +71,10 @@ HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no AS
         $stmt = $pdo->prepare(<<<HERE
 SELECT `id` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name LIMIT 1;
 HERE);
-        $stmt->execute(array(
-          ":last_name" => (!empty($client_search[0]) ? $client_search[0] . '%' : $_POST['q'] . '%'),
+        $stmt->execute([
+          ":last_name" => (!empty($client_search[0]) ? "$client_search[0]%" : $_POST['q'] . '%'),
           ":first_name" => (!empty($client_search[1]) ? substr($client_search[1], 2) . '%' : '')
-        )); // die($stmt->debugDumpParams());
+        ]); // die($stmt->debugDumpParams());
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         //die(var_dump($client_search));        
@@ -117,10 +115,10 @@ FROM `clients` AS c
 WHERE h2.id IS NULL AND `last_name` LIKE :last_name OR `first_name` LIKE :first_name
 ORDER BY `last_name`;
 HERE);
-          $stmt->execute(array(
-            ":last_name" => (!empty($client_search[0]) ? $client_search[0] . '%' : $_POST['q'] . '%' ),
+          $stmt->execute([
+            ":last_name" => (!empty($client_search[0]) ? "$client_search[0]%" : $_POST['q'] . '%'),
             ":first_name" => (!empty($client_search[1]) ? substr($client_search[1], 2) . '%' : ''),
-          )); // die($stmt->debugDumpParams());
+          ]); // die($stmt->debugDumpParams());
           break;
         }
       }
@@ -162,10 +160,10 @@ WHERE h2.id IS NULL AND `last_name` LIKE :last_name OR `first_name` LIKE :first_
 ORDER BY `last_name`;
 HERE); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-      $stmt->execute(array(
-        ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'),
-        ":first_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'), // $full_name[1]
-      ));
+      $stmt->execute([
+        ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? "$full_name[0]%" : "%$full_name[0]%") : '%'),
+        ":first_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? "$full_name[0]%" : "%$full_name[0]%") : '%'), // $full_name[1]
+      ]);
 
 
 
@@ -204,7 +202,7 @@ WHERE h2.id IS NULL
 ORDER BY `last_name`;
 HERE); // ORDER BY sort, hamper_no, 
 
-      $stmt->execute(array()); 
+      $stmt->execute([]); 
 
       $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); 
       if (isset($_GET['export']) && $_GET['export'] == '') {
@@ -239,17 +237,17 @@ HERE); // ORDER BY sort, hamper_no,
 
         while($row = array_shift($rows)) {
           //$sheet->setCellValue('A' . $rowCount, $row['hamper_no']);
-          $sheet->setCellValue('A' . $rowCount, $row['last_name']);
-          $sheet->setCellValue('B' . $rowCount, $row['first_name']);
-          $sheet->setCellValue('C' . $rowCount, $row['phone_number_1']);
-          $sheet->setCellValue('D' . $rowCount, $row['phone_number_2']);
-          $sheet->setCellValue('E' . $rowCount, $row['address']);
-          $sheet->setCellValue('F' . $rowCount, $row['group_size']);
-          $sheet->setCellValue('G' . $rowCount, $row['minor_children']);
-          $sheet->setCellValue('H' . $rowCount, (!empty($row['diet_vegetarian']) ? ($row['diet_vegetarian'] == '0' ?: 'yes') : ''));
-          $sheet->setCellValue('I' . $rowCount, (!empty($row['diet_gluten_free']) ? ($row['diet_gluten_free'] == '0' ?: 'yes') : ''));
-          $sheet->setCellValue('J' . $rowCount, (!empty($row['pet_cat']) ? ($row['pet_cat'] == '0' ?: 'yes') : ''));
-          $sheet->setCellValue('K' . $rowCount, (!empty($row['pet_dog']) ? ($row['pet_dog'] == '0' ?: 'yes') : ''));
+          $sheet->setCellValue("A$rowCount", $row['last_name']);
+          $sheet->setCellValue("B$rowCount", $row['first_name']);
+          $sheet->setCellValue("C$rowCount", $row['phone_number_1']);
+          $sheet->setCellValue("D$rowCount", $row['phone_number_2']);
+          $sheet->setCellValue("E$rowCount", $row['address']);
+          $sheet->setCellValue("F$rowCount", $row['group_size']);
+          $sheet->setCellValue("G$rowCount", $row['minor_children']);
+          $sheet->setCellValue("H$rowCount", !empty($row['diet_vegetarian']) ? ($row['diet_vegetarian'] == '0' ?: 'yes') : '');
+          $sheet->setCellValue("I$rowCount", !empty($row['diet_gluten_free']) ? ($row['diet_gluten_free'] == '0' ?: 'yes') : '');
+          $sheet->setCellValue("J$rowCount", !empty($row['pet_cat']) ? ($row['pet_cat'] == '0' ?: 'yes') : '');
+          $sheet->setCellValue("K$rowCount", !empty($row['pet_dog']) ? ($row['pet_dog'] == '0' ?: 'yes') : '');
           //$sheet->setCellValue('L' . $rowCount, $row['notes']);
           $rowCount++;
         }
@@ -303,20 +301,17 @@ HERE); // ORDER BY sort, hamper_no,
       
       $stmt = $pdo->prepare("SELECT `last_name`, `first_name` FROM `clients` WHERE `last_name` LIKE :last_name AND `first_name` LIKE :first_name ORDER BY `last_name` ASC LIMIT 10;");
 
-      $stmt->execute(array(
-        ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'),
-        ":first_name" => (!empty($full_name[1]) ? '%' . $full_name[1] . '%' : '%') // $full_name[1]
-      ));
+      $stmt->execute([
+        ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? "$full_name[0]%" : "%$full_name[0]%") : '%'),
+        ":first_name" => (!empty($full_name[1]) ? "%$full_name[1]%" : '%') // $full_name[1]
+      ]);
 
       $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
       
       $data['results'] = [];
       
       while($row = array_shift($rows)) {
-        if (count($full_name) == 1)
-          $data['results'][] = array('name' => $row['last_name']. ',&nbsp;' . $row['first_name']); // . ', ' . $row['first_name']
-        else
-          $data['results'][] = array('name' => $row['last_name'] . ',&nbsp;' . $row['first_name']);
+        $data['results'][] = (count($full_name) == 1) ? ['name' => $row['last_name'] . ',&nbsp;' . $row['first_name']] : ['name' => $row['last_name'] . ',&nbsp;' . $row['first_name']];
       }
 
       $data = array_map("unserialize", array_unique(array_map("serialize", $data)));
@@ -361,7 +356,7 @@ HERE;
 
 
     //$stmt = $pdo->prepare('SELECT h.`id` AS h_id, h.`hamper_no`, h.`client_id` AS c_id, c.`id`, `hamper_id`, c.`first_name`, c.`last_name`, c.`phone_number_1`, c.`address`, YEAR(h.`created_date`) AS h_year, IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) AS hamper_no, IF(IF(YEAR(h.`created_date`)=' . date('Y') . ', h.`hamper_no`, NULL) IS NULL,1,0) AS sort FROM `hampers` as h LEFT JOIN `clients` as c ON c.`id` = h.`client_id` ORDER BY last_name;');
-    $stmt->execute(array());
+    $stmt->execute([]);
 
 
     break;
@@ -404,10 +399,10 @@ HERE;
 
   $stmt = $pdo->prepare($query); // ORDER BY sort, hamper_no,  ... hamper_no IS NOT NULL ASC, hamper_no ASC,  
 
-  $stmt->execute(array(
-    ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'),
-    ":first_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? $full_name[0] . '%' : '%' . $full_name[0] . '%') : '%'), // $full_name[1]
-  ));
+  $stmt->execute([
+    ":last_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? "$full_name[0]%" : "%$full_name[0]%") : '%'),
+    ":first_name" => (!empty($full_name[0]) ? (strlen($full_name[0]) == 1 ? "$full_name[0]%" : "%$full_name[0]%") : '%'), // $full_name[1]
+  ]);
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); // handle POST/GET results
 }
 
@@ -418,7 +413,7 @@ HERE;
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Client Search</title>
 
-  <base href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>" />
+  <base href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>" />
   
   <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
   <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
@@ -493,7 +488,7 @@ td {
       </h3>
     </div>
     <div style="padding: 0px 20px 10px 20px;">
-      Client [ <?= ($client_dup_count > 0 ? '<a href="?client=duplicate"> (<code style="color: red;">' . $client_dup_count . '</code>) Duplicates</a> | ' : '' ) ?><a href="?client=children">Children</a> ]
+      Client [ <?= $client_dup_count > 0 ? "<a href=\"?client=duplicate\"> (<code style=\"color: red;\">$client_dup_count</code>) Duplicates</a> | " : '' ?><a href="?client=children">Children</a> ]
     </div>
   </div>
 
@@ -511,7 +506,7 @@ td {
   </div>
  
   <div style="border: 1px solid #000; width: 700px; margin: 10px auto; height: 55px;">
-    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" method="POST" action="<?='?' . http_build_query(['search' => 'clients'])?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -524,6 +519,17 @@ td {
             <option value="" />
           </datalist>&nbsp;&nbsp;&nbsp;
         </div>
+        
+        <div style="display: table-cell; text-align: left; padding-left: 10px;">
+          <label>Phone:&nbsp;&nbsp;
+            <input id="phone_numb" type="tel" name="q" list="phone_numbs" placeholder="(123) 456-7890"  value=""  autofocus="" oninput="phone_numb_input()" inputmode="text" disabled /> <!-- onclick="this.form.submit();" -->
+          </label>
+          <datalist id="phone_numbs">
+            <option value="" />
+          </datalist>&nbsp;&nbsp;&nbsp;
+        </div>
+        
+        
         <div style="display: tale-cell; text-align: right; padding-right: 25px;">
           <input type="submit" value="  Search  " style="border: none; cursor: pointer; box-shadow: 0 2px 5px 0 rgb(94, 158, 214); min-width: 90px; border-radius: 2px; padding: 2px 4px; outline: none; border: 1px solid  rgb (94, 158, 214); border-radius:0;" />
         </div>
@@ -581,7 +587,7 @@ if (!empty($rows))
   }
 else {
     $stmt = $pdo->prepare('ALTER TABLE clients AUTO_INCREMENT=1;');
-    $stmt->execute(array());
+    $stmt->execute([]);
 ?> 
         <tr style="text-indent: 3px;">
           <td></td>
@@ -594,10 +600,10 @@ else {
     </table>
   </div>
 
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
  
 <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
@@ -614,7 +620,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query( array( key($_GET) => current($_GET) ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query([key($_GET) => current($_GET)])?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist

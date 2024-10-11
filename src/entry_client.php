@@ -11,20 +11,19 @@ if (isset($_REQUEST['client'])) {
   elseif (is_string($_REQUEST['client'])) {
     if (ctype_digit($_REQUEST['client'])) {
       $stmt = $pdo->prepare("SELECT `id`, `minor_children`, `created_date` FROM `clients` WHERE `id` = :id LIMIT 1;");
-      $stmt->execute(array(
+      $stmt->execute([
         ":id" => filter_var($_REQUEST['client'], FILTER_VALIDATE_INT)
-      ));
+      ]);
       $row = $stmt->fetch();
       
       if (!empty($row))
         $_SESSION['client_id'] = $_REQUEST['client'] = filter_var( $_REQUEST['client'], FILTER_VALIDATE_INT);
       else
-        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array())));        
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([])));        
     } else
       $_SESSION['client_id'] = intval($_REQUEST['client']);
   }
-} else
-  $_SESSION['client_id'] = NULL;
+} else $_SESSION['client_id'] = NULL;
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST':
@@ -43,9 +42,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
       break;
 
     $stmt = $pdo->prepare("SELECT `id` FROM `clients` WHERE `id` = :client_id LIMIT 1;");
-    $stmt->execute(array(
+    $stmt->execute([
       ":client_id" => $_POST["client_id"]
-    ));
+    ]);
     $row = $stmt->fetch();
 
     if (empty($row)) {
@@ -54,12 +53,13 @@ SELECT a.id + 1 AS start, MIN(b.id) - 1 AS end
 FROM `clients` AS a, `clients` AS b
 WHERE a.id < b.id AND a.id >= 1 AND b.id <= (SELECT id FROM `clients` ORDER BY id DESC LIMIT 1)
 GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;
-QUERY);
-      $stmt->execute(array());
+QUERY
+);
+      $stmt->execute([]);
       $row_recycle = $stmt->fetch();
     
       $stmt = $pdo->prepare("INSERT IGNORE INTO `clients` (`id`, `hamper_id`, `last_name`, `first_name`, `phone_number_1`, `phone_number_2`, `address`, `group_size`, `minor_children`, `diet_vegetarian`, `diet_gluten_free`, `pet_cat`, `pet_dog`, `notes`, `active_status`, `bday_date`, `modified_date`, `created_date`) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-      $stmt->execute(array(
+      $stmt->execute([
         (!empty($row_recycle) ? $row_recycle['start'] : NULL),
         (!empty($_POST["last_name"]) ? $_POST["last_name"] : ''),
         (!empty($_POST["first_name"]) ? $_POST["first_name"] : ''),
@@ -77,32 +77,32 @@ QUERY);
         date('Y-m-d'),
         date('Y-m-d'),
         date('Y-m-d')
-      ));
+      ]);
         
       //$stmt = $pdo->prepare("SELECT `id` FROM `clients` ORDER BY `id` DESC LIMIT 1;");
-      //if ($stmt->execute(array())) $row = $stmt->fetch();
+      //if ($stmt->execute([])) $row = $stmt->fetch();
       $_SESSION['client_id'] = $pdo->lastInsertId();
     } else {
       if (!empty($_POST["client_delete"]) && $_POST["client_delete"] == 'yes') {
         $stmt = $pdo->prepare('DELETE FROM `clients` WHERE `clients`.`id` = :client_id');
-        $stmt->execute(array(
+        $stmt->execute([
           ":client_id" => (!empty($_POST["client_id"]) ? $_POST["client_id"] : NULL)
-        ));
+        ]);
 
         $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE `hampers`.`client_id` = :client_id');
-        $stmt->execute(array(
+        $stmt->execute([
           ":client_id" => (!empty($_POST["client_id"]) ? $_POST["client_id"] : NULL)
-        ));
+        ]);
   
-        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+        exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
           'client' => $_POST['client_id']
-        ))));
+        ])));
 
       }
 
       $stmt = $pdo->prepare("UPDATE `clients` SET `hamper_id` = :hamper_id, `last_name` = :last_name, `first_name` = :first_name, `phone_number_1` = :phone_number_1, `phone_number_2` = :phone_number_2, `address` = :address, `group_size` = :group_size, `minor_children` = :minor_children, `diet_vegetarian` = :diet_vegetarian, `diet_gluten_free` = :diet_gluten_free, `pet_cat` = :pet_cat, `pet_dog` = :pet_dog, `notes` = :notes, `active_status` = :active_status, " . ($_POST['minor_children'] == $_POST['minor_children_old'] ? '' : ' `bday_date` = "' . date('Y-m-d') . '",') . " `modified_date` = :modified_date WHERE `clients`.`id` = :client_id;");
 
-      $stmt->execute(array(
+      $stmt->execute([
         ":hamper_id" => (!empty($_POST['hamper_id']) ? $_POST['hamper_id'] : NULL),
         ":last_name" => (!empty($_POST['last_name']) ? $_POST['last_name'] : ''),
         ":first_name" => (!empty($_POST['first_name']) ? $_POST['first_name'] : ''),
@@ -119,12 +119,12 @@ QUERY);
         ":active_status" => (!empty($_POST['active_status']) ? $_POST['active_status'] : 1),
         ":modified_date" => date('Y-m-d'),
         ":client_id" => $_GET['client']
-      ));
+      ]);
 
       $_SESSION['client_id'] = $_GET['client'];
 /*
         $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '" ORDER BY `hamper_no` DESC LIMIT 1;');
-        if ($stmt->execute(array())) $row = $stmt->fetch();
+        if ($stmt->execute([])) $row = $stmt->fetch();
         if (!empty($row)) {
           list($alpha,$numeric) = sscanf($row['hamper_no'], "%[A-Z]%d");
           $numeric++;
@@ -136,19 +136,19 @@ QUERY);
       if (empty($_POST['create_hamper']))
         if (!empty($_POST['hamper_id']) && (int) $_POST['hamper_id']) {
           $stmt = $pdo->prepare("SELECT `id`, `address`, `group_size` FROM `hampers` WHERE `id` = :hamper_id " . (! $setting['update_prev_hamper_year'] ? ' AND YEAR(`created_date`) = "' . date('Y') . '"' : '') . " LIMIT 1;");
-          $stmt->execute(array(":hamper_id" => $_POST['hamper_id']));
+          $stmt->execute([":hamper_id" => $_POST['hamper_id']]);
           $row_hamper = $stmt->fetch();
           if (!empty($row_hamper)) {
             if ($row_hamper['group_size'] != $_POST['group_size']) {
               $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '" ORDER BY `hamper_no` DESC LIMIT 1;');
-              $stmt->execute(array());
+              $stmt->execute([]);
               $row = $stmt->fetch();
               if (!empty($row)) {
                 $stmt = $pdo->query('SELECT COUNT(*) FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '";');
                 $row_count = $stmt->fetchColumn();
         
                 $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '" ORDER BY `hamper_no` ASC;');
-                $stmt->execute(array());
+                $stmt->execute([]);
           
                 $i = 0;
                 $hamper_no = NULL; 
@@ -169,29 +169,29 @@ QUERY);
                 }
           
                 if (!empty($hamper_no))
-                  list($alpha,$numeric) = sscanf($hamper_no, "%[A-Z]%d"); 
+                  [$alpha, $numeric] = sscanf($hamper_no, "%[A-Z]%d"); 
                 else {
-                  list($alpha,$numeric) = sscanf($row['hamper_no'], "%[A-Z]%d");
+                  [$alpha, $numeric] = sscanf($row['hamper_no'], "%[A-Z]%d");
                   $numeric++;   
                 }
                 
               } else {
-                list($alpha,$numeric) = sscanf($_POST['group_size'][0], "%[A-Z]%d");
+                [$alpha, $numeric] = sscanf($_POST['group_size'][0], "%[A-Z]%d");
                 $numeric++;
               }
               $stmt = $pdo->prepare("UPDATE `hampers` SET `hamper_no` = :hamper_no WHERE `hampers`.`id` = :hamper_id;");
-              $stmt->execute(array(
+              $stmt->execute([
                 ":hamper_no" => $alpha . str_pad($numeric, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT),
                 ":hamper_id" => $row_hamper['id']
-              ));
+              ]);
             }
                 
             $stmt = $pdo->prepare("UPDATE `hampers` SET `transport_method` = :transport_method, `phone_number_1` = :phone_number_1, `phone_number_2` = :phone_number_2, `address` = :address, `group_size` = :group_size, `minor_children` = :minor_children, `diet_vegetarian` = :diet_vegetarian, `diet_gluten_free` = :diet_gluten_free, `pet_cat` = :pet_cat, `pet_dog` = :pet_dog WHERE `hampers`.`id` = :hamper_id;");
-            $stmt->execute(array(
+            $stmt->execute([
               ":transport_method" => (!empty($_POST['transport_method']) ? $_POST['transport_method'] : ''),
               ":phone_number_1" => (!empty($_POST['phone_number_1']) ? $_POST['phone_number_1'] : ''),
               ":phone_number_2" => (!empty($_POST['phone_number_2']) ? $_POST['phone_number_2'] : ''),
-              ":address" => (empty($row_hamper['address']) ? (!empty($_POST['address']) ? (!empty($_POST['transport_method'] && $_POST['transport_method'] != 'DELIVERY') ? '' : $_POST['address']) : '' ) : (!empty($_POST['transport_method'] && $_POST['transport_method'] != 'DELIVERY') ? '' : $row_hamper['address'])),
+              ":address" => (empty($row_hamper['address']) ? (!empty($_POST['address']) ? (!empty($_POST['transport_method'] && $_POST['transport_method'] != 'DELIVERY') ? '' : $_POST['address']) : '') : (!empty($_POST['transport_method'] && $_POST['transport_method'] != 'DELIVERY') ? '' : $row_hamper['address'])),
               ":group_size" => (!empty($_POST['group_size']) ? $_POST['group_size'] : ''),
               ":minor_children" => (!empty($_POST['minor_children']) ? $_POST['minor_children'] : ''),
               ":diet_vegetarian" => (!empty($_POST['diet_vegetarian']) ? '1' : '0'),
@@ -199,21 +199,21 @@ QUERY);
               ":pet_cat" => (!empty($_POST["pet_cat"]) ? '1' : '0'),
               ":pet_dog" => (!empty($_POST["pet_dog"]) ? '1' : '0'),
               ":hamper_id" => $_POST['hamper_id']
-           ));
+            ]);
           }
         }
     }
 
     if (!empty($_POST['create_hamper']) && $_POST['create_hamper'] == 'true') {
       $stmt = $pdo->prepare("SELECT `id` FROM `hampers` WHERE `client_id` = :client_id AND YEAR(`created_date`) = :hamper_year LIMIT 1;");
-      $stmt->execute(array(
+      $stmt->execute([
         ':client_id' => $_SESSION['client_id'],
         ':hamper_year' => date('Y')
-      ));
+      ]);
       $row = $stmt->fetch();
       if (empty($row)) {
         $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '" ORDER BY `hamper_no` DESC LIMIT 1;');
-        $stmt->execute(array());
+        $stmt->execute([]);
         $row = $stmt->fetch();
         if (!empty($row)) {
         
@@ -221,35 +221,34 @@ QUERY);
           $row_count = $stmt->fetchColumn();
         
           $stmt = $pdo->prepare('SELECT `hamper_no` FROM `hampers` WHERE `group_size` = "' . $_POST['group_size'] . '" AND YEAR(`created_date`) = "' . date('Y') . '" ORDER BY `hamper_no` ASC;');
-          $stmt->execute(array());
+          $stmt->execute([]);
 
           $i = 0;
           $hamper_no = NULL; 
           while($row = $stmt->fetch()) {
             $i++;
             //echo $row['hamper_no'] . ' == row hamper_no' . "<br />\n";
-            list($alpha,$numeric) = sscanf($row['hamper_no'], "%[A-Z]%d");
+            [$alpha, $numeric] = sscanf($row['hamper_no'], "%[A-Z]%d");
             if ($numeric > $i) {
               $hamper_no = $alpha . str_pad($i, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT);
               break;
             }
-            if ($row_count == $i)
-              $hamper_no = $alpha . str_pad($i + 1, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT);
-            else 
-              $hamper_no = $alpha . str_pad($i, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT);
+            
+            $hamper_no = ($row_count == $i) ? $alpha . str_pad($i + 1, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT) : $alpha . str_pad($i, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT);
+
             if ($i != $numeric)
               break;
           }
           
           if (!empty($hamper_no))
-            list($alpha,$numeric) = sscanf($hamper_no, "%[A-Z]%d"); 
+            [$alpha, $numeric] = sscanf($hamper_no, "%[A-Z]%d"); 
           else {
-            list($alpha,$numeric) = sscanf($row['hamper_no'], "%[A-Z]%d");
+            [$alpha, $numeric] = sscanf($row['hamper_no'], "%[A-Z]%d");
             $numeric++;   
           }
 
         } else {
-          list($alpha,$numeric) = sscanf($_POST['group_size'][0], "%[A-Z]%d");
+          [$alpha, $numeric] = sscanf($_POST['group_size'][0], "%[A-Z]%d");
           $numeric++;
         }
         
@@ -261,12 +260,13 @@ SELECT a.id + 1 AS start, MIN(b.id) - 1 AS end
 FROM `hampers` AS a, `hampers` AS b
 WHERE a.id < b.id AND a.id >= 1 AND b.id <= (SELECT id FROM `hampers` ORDER BY id DESC LIMIT 1)
 GROUP BY a.id HAVING start < MIN(b.id) LIMIT 1;
-QUERY);
-        $stmt->execute(array());
+QUERY
+);
+        $stmt->execute([]);
         $row_recycle = $stmt->fetch();
 
         $stmt = $pdo->prepare("INSERT INTO `hampers` (`id`, `client_id`, `hamper_no`, `transport_method`, `phone_number_1`, `phone_number_2`, `address`, `attention`, `group_size`, `minor_children`, `diet_vegetarian`, `diet_gluten_free`, `pet_cat`, `pet_dog`, `created_date`) VALUES (?, ?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?);");
-        $stmt->execute(array(
+        $stmt->execute([
           (!empty($row_recycle) ? $row_recycle['start'] : NULL),
           (!empty($_SESSION['client_id']) ? $_SESSION['client_id'] : NULL),
           $alpha . str_pad($numeric, $setting['str_pad_hamper_no'], "0", STR_PAD_LEFT),
@@ -281,53 +281,51 @@ QUERY);
           (!empty($_POST["pet_cat"]) ? '1' : '0'),
           (!empty($_POST["pet_dog"]) ? '1' : '0'),
           date('Y-m-d')
-        ));
+        ]);
               
         $hamper_id = $pdo->lastInsertId();
         $stmt = $pdo->prepare("UPDATE `clients` SET `hamper_id` = :hamper_id WHERE `clients`.`id` = :client_id;");
-        $stmt->execute(array(
+        $stmt->execute([
           ":hamper_id" => (!empty($hamper_id) ? $hamper_id : NULL),
           ":client_id" => (!empty($_SESSION['client_id']) ? $_SESSION['client_id'] : NULL)
-        ));
+        ]);
       }
-      exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+      exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
         'client' => $_SESSION['client_id']
-      ))));
+      ])));
     }
-    exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+    exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
       'search' => 'clients'
-    ))));
-    break;
+    ])));
+    //break;
   case 'GET':
     $stmt = $pdo->prepare("SELECT h.`id` AS h_id, h.`hamper_no`, h.`transport_method`, YEAR(h.`created_date`) AS h_year, c.* FROM `clients` as c LEFT JOIN `hampers` as h ON c.`id` = h.`client_id` WHERE c.`id` = :client_id ORDER BY h.`id` DESC LIMIT 1;"); // WHERE `id` = :id
 
-    $stmt->execute(array(
+    $stmt->execute([
       ":client_id" => $_SESSION['client_id']
-    ));
+    ]);
 
     $row_client = $stmt->fetch(PDO::FETCH_ASSOC);
     
     //if (empty($row_client)) // This doesn't work because there is no client=entry
-    //  exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query(array(
+    //  exit(header('Location: ' . APP_URL_BASE . '?' . http_build_query([
     //    'search' => 'clients'
-    //  ))));
+    //  ])));
 
     break;
-}
-
-?>
+} ?>
 <!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Client Entry</title>
 
-  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
+  <base href="<?= !defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE ?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" />
+  <link rel="shortcut icon" type="image/x-icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.png" />
   
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+  <link rel="stylesheet" type="text/css" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -373,7 +371,6 @@ td {
   clear: both;
   display: table;
 }
-
 </style>
 
 </head>
@@ -389,12 +386,12 @@ td {
       </form>
     </div>
     <div style="padding: 0px 20px 10px 20px;">
-      Client [ <?= ($client_dup_count > 0 ? '<a href="?client=duplicate"> (<code style="color: red;">' . $client_dup_count . '</code>) Duplicates</a> | ' : '' ) ?><a href="?client=children">Children</a> ]
+      Client [ <?= $client_dup_count > 0 ? "<a href=\"?client=duplicate\"> (<code style=\"color: red;\">$client_dup_count</code>) Duplicates</a> | " : '' ?><a href="?client=children">Children</a> ]
     </div>
   </div>
 
   <div style="border: 1px solid #000; width: 700px; margin: 20px auto; height: 55px;">
-    <form id="full_name_frm" name="client_search" method="POST" action="<?='?' . http_build_query( array( 'search' => 'clients' ))?>" autocomplete="off">
+    <form id="full_name_frm" name="client_search" method="POST" action="<?='?' . http_build_query(['search' => 'clients'])?>" autocomplete="off">
       <div style="display: table; margin: 0px auto; padding: 15px 0px 15px 0px; width: 98%;">
         <!-- <div style="display: table-cell; padding-left: 10px;">
           Client / <input type="tel" size="14" name="phone_number" value="" style="margin-right: 8px;" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
@@ -416,11 +413,11 @@ td {
 
   <div class="overflowAuto" style="border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px;">
 <!-- hamper_id  last_name  first_name  phone_number_1  address  group_size  occupants  special_diet  active_status  modified_date 	created_date -->
-    <form name="client_entry" action="<?='?' . http_build_query(array_merge(APP_QUERY, array()), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
+    <form name="client_entry" action="<?='?' . http_build_query(array_merge(APP_QUERY, []), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
       <input type="hidden" name="hamper_year" value="<?=date('Y')?>" />
-      <input type="hidden" name="client_id" value="<?=(!empty($row_client['id']) ? $row_client['id'] : '') ?>" />
+      <input type="hidden" name="client_id" value="<?= !empty($row_client['id']) ? $row_client['id'] : '' ?>" />
 <?php if (!empty($row_client['hamper_id']) && is_int((int) $row_client['hamper_id'])) { ?>
-      <input type="hidden" name="hamper_id" value="<?=(!empty($row_client['hamper_id']) ? $row_client['hamper_id'] : '') ?>" />
+      <input type="hidden" name="hamper_id" value="<?= !empty($row_client['hamper_id']) ? $row_client['hamper_id'] : '' ?>" />
 <?php } ?>
       <div style="padding: 0px 20px 10px 20px;">
         <div style="border-bottom: 1px dashed #000;">
@@ -444,7 +441,7 @@ if (!empty($row_client['h_id']) && is_int((int) $row_client['h_id'])) {
     } else if ($row_client['hamper_id'] != $row_client['h_id']) {
       if ($row_client['h_year'] == date('Y')) {
 ?>
-          <input type="checkbox" id="hamper" style="border-color: red; background-color: red; cursor: pointer;" name="hamper_id" value="<?=$row_client['h_id'];?>" <?=(!empty($row_client['h_id']) ? 'checked' : '')?> />
+          <input type="checkbox" id="hamper" style="border-color: red; background-color: red; cursor: pointer;" name="hamper_id" value="<?=$row_client['h_id'];?>" <?= !empty($row_client['h_id']) ? 'checked' : ''?> />
           <label for="hamper" style="cursor: pointer; color: red;">Hamper: [<?=$row_client['hamper_no'];?>] was found!</label>
 <?php } else { ?>
           <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?=(empty($row_client['h_id']) ?: (!$setting['auto_display_hamper_check'] ?: 'checked'))?> />
@@ -488,58 +485,60 @@ if (!empty($row_client['h_id']) && is_int((int) $row_client['h_id'])) {
             <label for="group_size" <?=(!empty($row_client) && empty($row_client['group_size']) ? 'style="color: red; text-decoration: underline; cursor: pointer;"' : '') ?>>Group Size:</label>
             <select id="group_size" name="group_size">
               <?php if (!empty($row_client) && empty($row_client['group_size'])) { ?><option value="" <?=(empty($row_client['group_size']) ? 'selected': '') ?>></option> <?php } ?>
-              <option value="SINGLE" <?=(!empty($row_client['group_size']) && $row_client['group_size'] == 'SINGLE' ? 'selected': '') ?>>Single</option>
-              <option value="COUPLE" <?=(!empty($row_client['group_size']) && $row_client['group_size'] == 'COUPLE' ? 'selected': '') ?>>Couple</option>
-              <option value="FAMILY" <?=(!empty($row_client['group_size']) && $row_client['group_size'] == 'FAMILY' ? 'selected': '') ?>>Family</option>
-              <option value="XLFAMILY" <?=(!empty($row_client['group_size']) && $row_client['group_size'] == 'XLFAMILY' ? 'selected': '') ?>>XLFamily</option>
+              <option value="SINGLE" <?= !empty($row_client['group_size']) && $row_client['group_size'] == 'SINGLE' ? 'selected' : '' ?>>Single</option>
+              <option value="COUPLE" <?= !empty($row_client['group_size']) && $row_client['group_size'] == 'COUPLE' ? 'selected' : '' ?>>Couple</option>
+              <option value="FAMILY" <?= !empty($row_client['group_size']) && $row_client['group_size'] == 'FAMILY' ? 'selected' : '' ?>>Family</option>
+              <option value="XLFAMILY" <?= !empty($row_client['group_size']) && $row_client['group_size'] == 'XLFAMILY' ? 'selected' : '' ?>>XLFamily</option>
             </select>
           </div>
           <div style="display: inline-block; margin: 5px 0 0 auto; text-align: right; width: 326px;">
-            Entry Date: <?=(!empty($row_client['created_date']) ? $row_client['created_date'] : date('Y-m-d'))?>
+            Entry Date: <?= !empty($row_client['created_date']) ? $row_client['created_date'] : date('Y-m-d')?>
           </div>
         </div>
         <div style="margin: 10px auto;">
           <div style="display: inline; margin-left: 20px;">
-            <label for="last_name" <?=(!empty($row_client['last_name']) ?: 'style="color: red; text-decoration: underline; cursor: pointer;"') ?>>Last Name:</label> <input id="last_name" type="text" name="last_name" value="<?=(!empty($row_client['last_name']) ? $row_client['last_name'] : '') ?>" onkeyup="this.value = this.value.toUpperCase();" <?= ( $_GET['client'] == 'entry' ? 'autofocus=""' : '') ?> />
+            <label for="last_name" <?= !empty($row_client['last_name']) ?: 'style="color: red; text-decoration: underline; cursor: pointer;"' ?>>Last Name:</label> <input id="last_name" type="text" name="last_name" value="<?= !empty($row_client['last_name']) ? $row_client['last_name'] : '' ?>" onkeyup="this.value = this.value.toUpperCase();" <?= $_GET['client'] == 'entry' ? 'autofocus=""' : '' ?> />
           </div>
       
           <div style="display: inline; margin-left: 20px;">
-            <label for="first_name" <?=(!empty($row_client['last_name']) ?: 'style="color: red; text-decoration: underline; cursor: pointer;"') ?>>First Name:</label> <input id="first_name" type="text" name="first_name" value="<?=(!empty($row_client['first_name']) ? $row_client['first_name'] : '') ?>" onkeyup="this.value = this.value.toUpperCase();" />
+            <label for="first_name" <?= !empty($row_client['last_name']) ?: 'style="color: red; text-decoration: underline; cursor: pointer;"' ?>>First Name:</label> <input id="first_name" type="text" name="first_name" value="<?= !empty($row_client['first_name']) ? $row_client['first_name'] : '' ?>" onkeyup="this.value = this.value.toUpperCase();" />
           </div>
         </div>
         <div style="margin-top: 10px; margin-left: 20px;">
           <div>
-            <label for="phone_number_1" <?= (!empty($row_client['phone_number_1']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_1']) ? '' : 'style="color: red; text-decoration: underline; cursor: pointer;"') : 'style="cursor: pointer;"')?> title="Incomplete.">Phone #:</label> <input id="phone_number_1" type="tel" size="14" name="phone_number_1" value="<?=(!empty($row_client['phone_number_1']) ? $row_client['phone_number_1'] : '') ?>" style="margin-right: 8px; <?=(!empty($row_client['phone_number_1']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_1']) ? '' : 'border: 1px solid red;') : '')?>" title="Format: 123-456-7890" placeholder="(123) 456-7890" />&nbsp;
-            <label for="phone_number_2" <?= (!empty($row_client['phone_number_2']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_2']) ? '' : 'style="color: red; text-decoration: underline; cursor: pointer;"') : '')?> title="Incomplete.">Alternate #:</label> <input id="phone_number_2" type="tel" size="14" name="phone_number_2" value="<?=(!empty($row_client['phone_number_2']) ? $row_client['phone_number_2'] : '') ?>" style="margin-right: 8px; <?=(!empty($row_client['phone_number_2']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_2']) ? '' : 'border: 1px solid red;') : '')?>" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
+            <label for="phone_number_1" <?= !empty($row_client['phone_number_1']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_1']) ? '' : 'style="color: red; text-decoration: underline; cursor: pointer;"') : 'style="cursor: pointer;"'?> title="Incomplete.">Phone #:</label> <input id="phone_number_1" type="tel" size="14" name="phone_number_1" value="<?= !empty($row_client['phone_number_1']) ? $row_client['phone_number_1'] : '' ?>" style="margin-right: 8px; <?= !empty($row_client['phone_number_1']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_1']) ? '' : 'border: 1px solid red;') : ''?>" title="Format: 123-456-7890" placeholder="(123) 456-7890" />&nbsp;
+            <label for="phone_number_2" <?= !empty($row_client['phone_number_2']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_2']) ? '' : 'style="color: red; text-decoration: underline; cursor: pointer;"') : ''?> title="Incomplete.">Alternate #:</label> <input id="phone_number_2" type="tel" size="14" name="phone_number_2" value="<?= !empty($row_client['phone_number_2']) ? $row_client['phone_number_2'] : '' ?>" style="margin-right: 8px; <?= !empty($row_client['phone_number_2']) ? (preg_match('/^(\+?\(?[0-9]{2,3}\)?)([ -]?[0-9]{2,4}){3}$/', $row_client['phone_number_2']) ? '' : 'border: 1px solid red;') : ''?>" title="Format: 123-456-7890" placeholder="(123) 456-7890" />
           </div>
           <div style="display: table;">
             <div style="display: table-cell; width: 450px;">
-          <div class="showhideaddress" style="margin-top: 10px; display: <?=(!empty($row_client['transport_method']) && $row_client['transport_method'] == 'DELIVERY' ? 'block' : 'none')?>;">
+          <div class="showhideaddress" style="margin-top: 10px; display: <?= !empty($row_client['transport_method']) && $row_client['transport_method'] == 'DELIVERY' ? 'block' : 'none' ?>;">
             <label for="address">Address:</label> <input id="address" type="text" size="30" name="address" value="<?=(!empty($row_client['address']) ? $row_client['address'] : '') ?>" title="Address must be filled in." placeholder="123 General Street"  />
           </div>
           <div style="margin-top: 10px;">
 <?php (!empty($row_client['bday_date']) ? $date = DateTime::createFromFormat("Y-m-d", $row_client['bday_date']) : $date = DateTime::createFromFormat("Y-m-d", date('Y-m-d'))) ?>
-            <label for="minor_children" <?=(!empty($row_client['minor_children']) ? (date('Y') - $date->format("Y") >= 1 ? 'style="color: red; text-decoration: underline; cursor: pointer;"' : '') : '')?> onClick="document.getElementById('minor_children').removeAttribute('disabled');" title="Override: Add/Remove Children">Children: *</label> <input id="minor_children" type="text" name="minor_children" value="<?=(!empty($row_client['minor_children']) ? $row_client['minor_children'] : '') ?>" <?=(!empty($row_client['minor_children']) ? (date('Y') - $date->format("Y") >= 1 ? 'disabled' : '') : '')?> onkeyup="this.value = this.value.toUpperCase();" placeholder="M6,F12,N..." title="M6[,F3...]>"/>
+            <label for="minor_children" <?= !empty($row_client['minor_children']) ? (date('Y') - $date->format("Y") >= 1 ? 'style="color: red; text-decoration: underline; cursor: pointer;"' : '') : ''?> onClick="document.getElementById('minor_children').removeAttribute('disabled');" title="Override: Add/Remove Children">Children: *</label> <input id="minor_children" type="text" name="minor_children" value="<?= !empty($row_client['minor_children']) ? $row_client['minor_children'] : '' ?>" <?= !empty($row_client['minor_children']) ? (date('Y') - $date->format("Y") >= 1 ? 'disabled' : '') : ''?> onkeyup="this.value = this.value.toUpperCase();" placeholder="M6,F12,N..." title="M6[,F3...]>"/>
             <div style="">
 <?php
-$children = (!empty($row_client['minor_children']) ? explode(",",$row_client['minor_children']) : []);
+$children = !empty($row_client['minor_children']) ? explode(",", $row_client['minor_children']) : [];
 $numOfChild = count($children);
 $i = 0;
 
 if (date('Y') - $date->format("Y") >= 1)
   while ($i < $numOfChild) {
     $gender = $age = NULL;
-    if (!is_numeric($children[$i])) list($gender,$age) = sscanf($children[$i], "%[A-Z]%d");
-    else list($age) = sscanf($children[$i], "%d");
+    if (!is_numeric($children[$i]))
+      [$gender, $age] = sscanf($children[$i], "%[A-Z]%d");
+    else
+      [$age] = sscanf($children[$i], "%d");
     if ($age >= 18) { $i++; continue; }
 ?>
               <div style="display: inline-block; margin-left: 20px; <?= (date('Y') - $date->format("Y") >= 1 ? 'border: 1px solid red;' : '')?>">
                 <select name="children_gender[]">
-                  <option value="M" <?= (!empty($gender) && $gender == 'M' ? 'selected': '') ?>>Male</option>
-                  <option value="F" <?= (!empty($gender) && $gender == 'F' ? 'selected': '') ?>>Female</option>
-                  <option value="" <?= (!empty($gender) && $gender == 'N' || $gender == 'O' || $gender == '' ? 'selected': '') ?>>Neutral</option>
+                  <option value="M" <?= !empty($gender) && $gender == 'M' ? 'selected' : '' ?>>Male</option>
+                  <option value="F" <?= !empty($gender) && $gender == 'F' ? 'selected' : '' ?>>Female</option>
+                  <option value="" <?= !empty($gender) && $gender == 'N' || $gender == 'O' || $gender == '' ? 'selected' : '' ?>>Neutral</option>
                 </select>
-                <input type="number" name="children_age[]" value="<?= (!empty($age) || $age == 0 ? (date('Y') - $date->format('Y')) + $age : '') ?>" min="0" max="18" size="3" />
+                <input type="number" name="children_age[]" value="<?= !empty($age) || $age == 0 ? (date('Y') - $date->format('Y')) + $age : '' ?>" min="0" max="18" size="3" />
               </div><br />
 <?php   $i++;
   } ?>
@@ -556,8 +555,8 @@ if (date('Y') - $date->format("Y") >= 1)
           </div>
           <div style="margin-top: 10px;">
             Pets:
-            <input id="pet_cat" type="checkbox" name="pet_cat" value="yes" <?=(!empty($row_client['pet_cat']) && $row_client['pet_cat'] == '1' ? 'checked' : '')?> /><label for="pet_cat">Cat</label>
-            <input id="pet_dog" type="checkbox" name="pet_dog" value="yes" <?=(!empty($row_client['pet_dog']) && $row_client['pet_dog'] == '1' ? 'checked' : '')?> /><label for="pet_dog">Dog</label>
+            <input id="pet_cat" type="checkbox" name="pet_cat" value="yes" <?= !empty($row_client['pet_cat']) && $row_client['pet_cat'] == '1' ? 'checked' : ''?> /><label for="pet_cat">Cat</label>
+            <input id="pet_dog" type="checkbox" name="pet_dog" value="yes" <?= !empty($row_client['pet_dog']) && $row_client['pet_dog'] == '1' ? 'checked' : ''?> /><label for="pet_dog">Dog</label>
               </div>
           <div style="margin-top: 10px;">
 
@@ -595,9 +594,9 @@ if ($row_client['h_year'] == date_parse($row_client['created_date'])['year'] || 
     </form>
 <?php
 $stmt = $pdo->prepare('SELECT `id`, `hamper_no`, `transport_method`, `group_size`, `phone_number_1`, `address`, YEAR(`created_date`) FROM `hampers` WHERE `client_id` = :client_id ORDER BY `id` DESC;');
-$stmt->execute(array(
+$stmt->execute([
   ":client_id" => (!empty($_SESSION['client_id']) ? $_SESSION['client_id'] : NULL),
-));
+]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if (count($rows) >= 1) {
 ?>
@@ -638,11 +637,11 @@ if (count($rows) >= 1) {
 <?php } ?>
   </div>
   
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
     
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery.inputmask/jquery.inputmask.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery-mask/jquery.mask.min.js"></script> 
 
 <script>
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];
@@ -659,7 +658,7 @@ document.querySelector("#full_name").addEventListener('keyup', function (e) {
   var end = e.target.selectionEnd;
   e.target.value = e.target.value.toUpperCase();
   e.target.setSelectionRange(start, end);
-  url = '<?=APP_URL_BASE . '?' . http_build_query( array( 'search' => 'clients' ))?>&q=' + val;
+  url = '<?=APP_URL_BASE . '?' . http_build_query(['search' => 'clients'])?>&q=' + val;
   document.getElementById('full_names').innerHTML = '';
   $.getJSON(url, function(data) {
   //populate the packages datalist
