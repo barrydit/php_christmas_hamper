@@ -72,7 +72,6 @@ and define('APP_LOGIN', $login);
 
 // absolute pathname 
 if (basename(__DIR__) == 'config') {
-  define('APP_PATH', /* $_ENV['APP_PATH'] ?? */ dirname(__DIR__) . DIRECTORY_SEPARATOR);
   //chdir('../');
   define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
     'config' => 'config' . DIRECTORY_SEPARATOR,

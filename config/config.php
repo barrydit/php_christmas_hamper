@@ -109,6 +109,10 @@ if (is_array($errors) && !empty($errors)) { ?>
 
 define('APP_ERRORS', $errors ?? [/*ob_get_contents()*/]);
 
+  // Enable debugging and error handling based on APP_DEBUG and APP_ERROR constants
+!defined('APP_ERROR') and define('APP_ERROR', false);
+!defined('APP_DEBUG') and define('APP_DEBUG', isset($_GET['debug']) ? TRUE : FALSE);
+
 ob_end_clean();
 
 //var_dump(APP_ERRORS);
