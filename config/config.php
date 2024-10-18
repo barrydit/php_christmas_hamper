@@ -37,7 +37,7 @@ ob_start();
     // For example:
     // include '/home/user_123/public_html/config.php';
 if (strpos(APP_SELF, '/public/') !== false || strpos(APP_SELF, '/public_html/') !== false || strpos(APP_SELF, '/www/') !== false || strpos(APP_SELF, '/htdocs/') !== false || strpos(APP_SELF, '/html/') !== false || strpos(APP_SELF, '/web/') !== false) {  
-  $errors['APP_PUBLIC'] = "The `" . basename(dirname(APP_SELF)) . "` scenario was detected.\n";
+  //$errors['APP_PUBLIC'] = "The `" . basename(dirname(APP_SELF)) . "` scenario was detected.\n";
   
   if (is_dir(dirname(APP_SELF, 1) . '/config')) {
     $errors['APP_PUBLIC'] .= "\t" . dirname(APP_SELF, 1) . '/config/*' . ' was found. This is not safe.'; 
