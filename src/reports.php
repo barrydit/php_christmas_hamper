@@ -74,9 +74,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
           $rowCount++;
         }
       
-        $spreadsheet->getActiveSheet()->getStyle('E2:E' . $rowCount)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $spreadsheet->getActiveSheet()->getStyle("E2:E$rowCount")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        $spreadsheet->getActiveSheet()->getStyle('F2:F' . $rowCount)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $spreadsheet->getActiveSheet()->getStyle("F2:F$rowCount")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
         
         
         for ($i = 'A'; $i != $spreadsheet->getActiveSheet()->getHighestColumn(); $i++) {
@@ -149,12 +149,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?=APP_NAME?> -- Reports</title>
 
-  <base href="<?=(!defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE )?>" />
+  <base href="<?= !defined('APP_URL_BASE') ? 'http://' . APP_DOMAIN . APP_URL_PATH : APP_URL_BASE ?>" />
   
-  <link rel="shortcut icon" type="image/x-icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.ico" />
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/images/favicon.png" /> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/images/favicon.png" /> 
   
-  <link rel="shortcut icon" type="image/png" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+  <link rel="shortcut icon" type="image/png" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
 <style>
 html, body {
@@ -219,6 +219,7 @@ td {
     <div style="padding: 0px 20px 0px 20px;">
       <div style="float: right;">
         <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+          <button type="submit" name="logout" value="" style="float: right; width: 7em; margin-left: 3px;">Logout</button>&nbsp;
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </div>
@@ -236,10 +237,10 @@ foreach($_GET as $key => $val) {
   }
 }
 
-$report = (!empty($_GET['reports']) ? $_GET['reports'] : '');
-$date = (!empty($_GET['date']) ? $_GET['date'] : '');
+$report = !empty($_GET['reports']) ? $_GET['reports'] : '';
+$date = !empty($_GET['date']) ? $_GET['date'] : '';
 $transport_method = (!empty($_GET['transport_method'])? $_GET['transport_method'] : '');
-$group_size = (!empty($_GET['group_size'])? $_GET['group_size'] : '');
+$group_size = !empty($_GET['group_size']) ? $_GET['group_size'] : '';
 
 ?>
   <div style="position: relative; padding-top: 10px; width: 700px; margin: auto; background-color: #EEE0F2;">
@@ -594,9 +595,9 @@ $_GET = $_GET + (array) ['date' => ''];
 
   </div>
   
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
     
-<script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/bootstrap/bootstrap.min.js"></script>
  
     <script>  
 var overflowAuto = document.getElementsByClassName('overflowAuto')[0];

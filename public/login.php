@@ -7,10 +7,6 @@ if (session_status() == PHP_SESSION_NONE):
   require_once dirname(__DIR__, 1) . '/config/session.php'; // session_start();
 endif;
 
-header('Cache-Control: no-cache, no-store, must-revalidate'); 
-header('Pragma: no-cache'); 
-header('Expires: 0');
-
 // https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 try {
     $result = $pdo->query('SELECT 1 FROM ' . DB_TABLES[0] . ' LIMIT 1;');
@@ -31,7 +27,7 @@ try {
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST':
-
+    //dd($_POST);
     /*if (isset($_REQUEST['submit-register'])) {
       $stmt = $pdo->prepare("INSERT INTO `users` (`name`, `username`, `password`) VALUES (?, ?, ?);");
       $stmt->execute([
@@ -42,7 +38,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       exit(header('Location: ' . APP_URL_BASE));
     } else */
     if (isset($_REQUEST['submit-login'])) {
-    //die(var_dump($_POST));
+
 
   //$username = stripslashes($_POST['username']);
   //$username = mysqli_real_escape_string($myiconnect, $username);
@@ -63,11 +59,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
       if (!empty($row_login))
         if (password_verify($_POST['password'], $row_login['password'])) {
-          $_SESSION['user_id'] = $_SESSIONS[session_id()]['user_id'] = (int)$row_login['id'];
-          (isset($_REQUEST['enable_ssl']) || @$_REQUEST['enable_ssl'] == 'on') ? $_SESSION['enable_ssl'] = TRUE : $_SESSION['enable_ssl'] = FALSE;
-          unset($_SESSIONS['shutdown']);
-          $session_save();
-          exit(header('Location: ' . APP_URL_BASE));	
+          $_SESSION['user_id'] = /*$_SESSIONS[session_id()]['user_id'] =*/ (int) $row_login['id'];
+          (isset($_REQUEST['enable_ssl']) && $_REQUEST['enable_ssl'] == 'on') ? $_SESSION['enable_ssl'] = TRUE : $_SESSION['enable_ssl'] = FALSE;
+          //unset($_SESSIONS['shutdown']);
+          //$session_save();
+          if (!headers_sent()) 
+            exit(header('Location: ' . APP_URL_BASE));	
         } else
           $login_error = 'Username / Password did not match.';
     }
@@ -79,8 +76,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
     $row_login = $stmt->fetch();
     
     $_SESSION['token'] = md5(uniqid(mt_rand(), true)); // bin2hex(random_bytes(35));
-
     break;
+}
+
+if (!headers_sent()) {
+  header('Content-Type: text/html; charset=utf-8');
+  header('X-Content-Type-Options: nosniff');
+  header('X-Frame-Options: SAMEORIGIN');
+  header('X-XSS-Protection: 1; mode=block');
+  header('Referrer-Policy: no-referrer');
+  header('Feature-Policy: geolocation "self"; microphone "none"; camera "none"; speaker "none"; vibrate "none"; payment "none"; usb "none"; sync-xhr "none"; magnetometer "none"; accelerometer "none"; gyroscope "none"; display-capture "none"; fullscreen "self";');
+  header('Cache-Control: no-cache, no-store, must-revalidate');
+  header('Pragma: no-cache');
+  header('Expires: 0');
 }
 
 /*
@@ -96,13 +104,13 @@ die();
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title><?=APP_NAME?> -- Login</title>
+    <title><?= APP_NAME ?> -- Login</title>
 
-    <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE?>" />
+    <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE ?>" />
     
-    <link rel="shortcut icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>favicon.ico" />
+    <link rel="shortcut icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>favicon.ico" />
 
-    <link rel="stylesheet" type="text/css" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
     <style type="text/css">
 table, td {
@@ -209,8 +217,8 @@ td {
     </div><!--end log-form -->
   
     <!-- JQUERY SCRIPTS -->
-    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery/jquery.min.js"></script>
-    <script src="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
+    <script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery/jquery.min.js"></script>
+    <script src="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/js/jquery.disableAutoFill/jquery.disableAutoFill.min.js"></script>
   
     <script type="text/javascript">
 $(document).ready(function(){

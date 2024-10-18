@@ -60,8 +60,7 @@ HERE
 
     $_GET[$get_key] = $get_value;
 
-    if (!empty($_GET['print']) && $_GET['print'] == 'labels') {
-?>
+    if (!empty($_GET['print']) && $_GET['print'] == 'labels') { ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -422,6 +421,7 @@ td {
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search">Search</a> &#11106;  <a href="?search=clients">Clients</a> : Hampers
         <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+          <button type="submit" name="logout" value="" style="float: right; width: 7em; margin-left: 3px;">Logout</button>&nbsp;
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </h3>
@@ -518,7 +518,7 @@ $_GET = $_GET + (array) ['group_size' => ''];
           <label>Hamper Year: </label>
 <?php
 foreach($_GET as $key => $val) {
-  if($key == 'date') {
+  if ($key == 'date') {
     $item = $_GET[$key];
     unset($_GET[$key]);
     //array_push($_GET, $item);
@@ -527,21 +527,32 @@ foreach($_GET as $key => $val) {
   }
 }
 
+$date = $_GET['date'] ?? date('Y');
 $_GET = (array) ['search' => $search];
-(!empty($transport_method) ? $_GET = $_GET + (array) ['transport_method' => $transport_method] : '');
-(!empty($group_size) ? $_GET = $_GET + (array) ['group_size' => $group_size] : '');
-$_GET = $_GET + (array) ['date' => ''];
+(!empty($transport_method) ? $_GET += (array) ['transport_method' => $transport_method] : '');
+(!empty($group_size) ? $_GET += (array) ['group_size' => $group_size] : '');
+$_GET += (array) ['date' => ''];
 ?>
           <select onchange="window.location.href=('<?='?' . http_build_query($_GET, '', '&amp;')?>' + this.value).replace(/&amp;/g, '&');">
-            <option value=""></option>
+            
 <?php
   $stmt = $pdo->prepare('SELECT DISTINCT YEAR(`created_date`) FROM `hampers` ORDER BY `created_date` DESC;');
   $stmt->execute([]);
-
+  
   while ($row_dates = $stmt->fetch()) {
-    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"'. (empty($date) && $date != $row_dates['YEAR(`created_date`)'] ? '' : ' selected="selected"') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
+    switch ($date) {
+        case $row_dates['YEAR(`created_date`)']:
+            echo '            <option value="' . date('Y') . '" ' . isset( $date) && $date == date('Y') ? ' selected="selected"' : '' . '>' . date('Y') . '</option>' . "\n";
+            break;
+        default:
+            echo '<option></option>';
+            break;
+    }
+    echo '                <option value="' . $row_dates['YEAR(`created_date`)'] . '"' . (isset($date) && $date != $row_dates['YEAR(`created_date`)']  ? '' : ' selected="selected"') . '>' . $row_dates['YEAR(`created_date`)'] . '</option>' . "\n";
   }
-?>
+  if ($stmt->rowCount() == 0) { ?>
+<option><?= date('Y'); ?></option>
+<?php } ?>
           </select>
         </div>
       </form>

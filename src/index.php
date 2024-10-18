@@ -6,11 +6,13 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 */
-$json = file_get_contents(SESSION_SAVE_PATH . '/sessions.json', true);
+if (realpath(APP_PATH . APP_BASE['session'] . 'sessions.json')) {
+$json = file_get_contents(APP_PATH . APP_BASE['session'] . 'sessions.json', true); // ini_get('session.save_path') . SESSION_SAVE_PATH
 $json_decode = json_decode($json, true);
 
 $visitor_count = 0;
 $user_count = 0;
+}
 /*
 foreach($json_decode as $key => $file) {
   if (!empty($file['user_id']) || is_numeric($file['user_id'])) $user_count++;
@@ -90,8 +92,8 @@ td {
       </thead>
       <tbody>
         <tr>
-          <td style="text-align: center;"><?=$user_count?></td>
-          <td style="text-align: center;"><?=$visitor_count?></td>
+          <td style="text-align: center;"><?=$user_count ?? 0?></td>
+          <td style="text-align: center;"><?=$visitor_count ?? 0 ?></td>
         </tr>
       </tbody>
     </table>
@@ -103,10 +105,11 @@ td {
 <?php } ?>
   <div style="border: 1px solid #000; width: 700px; margin: auto;">
     <div style="padding: 0px 20px 0px 20px;">
-      <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /></a> Home | <a href="?reports">Reports</a> | Search &#11106; <a href="?search=clients" style="text-decoration: none;">Clients</a> : <a href="?search=hampers" style="text-decoration: none;">Hampers</a>
+      <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | Search <img src="assets/images/arrow_right.png" /><!-- &#11106; --> <a href="?search=clients" style="text-decoration: none;">Clients</a> : <a href="?search=hampers" style="text-decoration: none;">Hampers</a>
         <form style="float: right;" action autocomplete="off" method="GET">
           <button type="submit" name="db" value="<?= DB_NAME[0]; ?>" style="width: 7em; margin-right: 3px;">Database</button>
           <button type="submit" name="client" value="entry" style="width: 7em; margin-left: 3px;">New Client</button>
+          <button type="submit" name="logout" value="" style="width: 7em; margin-left: 3px;">Logout</button>
         </form>
       </h3>
     </div>

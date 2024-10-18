@@ -37,7 +37,7 @@ define('DB_TABLES', [
 ]);
 
 define('DB_BACK_PATH', APP_PATH . APP_BASE['database'] . 'backup' . DIRECTORY_SEPARATOR);
-define('DB_BACK_FILE', DB_NAME[0].'___('. date('Y') .').sql'); // date('Y-m-d').'_'.date('H-i-s')
+define('DB_BACK_FILE', DB_NAME[0].'___('. date('Y') - 1 .').sql'); // date('Y-m-d').'_'.date('H-i-s')
 
 $dsn = 'mysql:host=' . DB_HOST . '; dbname=' . DB_NAME[0] . ';charset=' . DB_CHARSET;
 

@@ -205,6 +205,148 @@ QUERY
     }
 
     if (!empty($_POST['create_hamper']) && $_POST['create_hamper'] == 'true') {
+
+
+      $setting['del_prev_annual_hamper'] = true;
+      
+      if ($setting['del_prev_annual_hamper']) {
+      
+      /*
+        Look for 1 hamper, where the YEAR(`createed_date`) is less than date('Y') aka CURR_YEAR
+
+          If found, look for 1 hamper, where the YEAR(`created_date`) is equal to this date('Y') aka CURR_YEAR
+
+          [Cancels/Requires] in having multiple years (current year, and < date('Y')) at the same time, before they are deleted.
+      */
+
+        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date LIMIT 1;');
+        $stmt->execute([
+          ":date" => date('Y')
+        ]);
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!empty($row)) {
+
+          /* Backup yearly  date('Y')-1 */
+          if (!is_file(DB_BACK_PATH . DB_BACK_FILE))
+            exec('mysqldump'
+            . ' --user=' . DB_UNAME
+            . (empty(DB_PWORD) ? '' : ' --password=' . DB_PWORD)
+            . ' --host=' . DB_HOST
+            . ' --default-character-set=utf8'
+            . ' --single-transaction'
+            //. ' --routines'
+            . ' --add-drop-database'
+            . ' --add-drop-table'
+            . ' --databases ' . DB_NAME[0]
+            . ' --result-file="' . DB_BACK_PATH . DB_BACK_FILE . '"'
+            . ' 2>&1', $output, $worked);
+
+          if (!empty($output)) die(var_dump($output));
+
+          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
+          $stmt->execute([
+            ":date" => date('Y')
+          ]);
+        
+          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+          if (!empty($row)) {
+
+            $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
+            $stmt->execute([
+              ":date" => date('Y')
+            ]);
+
+          } else {
+
+            $stmt = $pdo->prepare('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE `hampers`; ALTER TABLE `hampers` AUTO_INCREMENT = 1; SET FOREIGN_KEY_CHECKS = 1;');
+            $stmt->execute([]);
+
+          }
+
+          while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
+            $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE YEAR(`created_date`) < :date;');
+            $stmt->execute([
+              ":date" => date('Y')
+            ]);
+          }
+
+        }
+       
+/*
+          Look for 1 Hamper WHERE YEAR(created_date) = CURR_YEAR
+          
+
+        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
+        $stmt->execute([
+          ":date" => date('Y')
+        ]);
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);        
+        
+        if (!empty($row)) {
+               
+          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
+          $stmt->execute([
+            ":date" => date('Y')
+          ]);
+        
+          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+          if (!empty($row)) {
+            $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC;');
+            $stmt->execute([
+              ":date" => date('Y')
+            ]);
+        
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
+              $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE `id` = :client_id AND `hamper_id` = :hamper_id ;');
+              $stmt->execute([
+                ":client_id" => $row['client_id'],
+                ":hamper_id" => $row['id']
+              ]);
+            }
+          
+            $stmt = $pdo->prepare('SELECT `id`, `client_id`, YEAR(`created_date`) FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC LIMIT 1;');
+            $stmt->execute([
+              ":date" => date('Y')
+            ]);
+          
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+          
+            if (!empty($row)) {
+              $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
+              $stmt->execute([
+                ":date" => date('Y')
+              ]);
+            } else {
+              $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) <= :date ORDER BY `id` DESC LIMIT 1;');
+              $stmt->execute([
+                ":date" => date('Y')
+              ]);
+        
+              $row = $stmt->fetch(PDO::FETCH_ASSOC);
+              
+              if (!empty($row)) {
+
+              } else {
+
+              }
+            
+              // check if there are any rows for curr_year ... backup, otherwise truncate
+            }
+          }
+        }
+*/
+      }
+
+
+
+
+
+
       $stmt = $pdo->prepare("SELECT `id` FROM `hampers` WHERE `client_id` = :client_id AND YEAR(`created_date`) = :hamper_year LIMIT 1;");
       $stmt->execute([
         ':client_id' => $_SESSION['client_id'],
@@ -381,7 +523,9 @@ td {
         <h3>
           <a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search=clients" style="text-decoration: none;">Client</a> &#11106;
           <span style="font-weight: normal;"><?=(!empty($row_client)) ? $row_client['last_name'] . ', ' . $row_client['first_name'] : '(<i>New Client</i>)' ?></span>
-          <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
+                    <button type="submit" name="logout" value="" style="float: right; width: 7em; margin-left: 3px;">Logout</button>&nbsp;
+                    <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
+
         </h3>
       </form>
     </div>
@@ -411,7 +555,20 @@ td {
     </form>
   </div>
 
-  <div class="overflowAuto" style="border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px;">
+  <div class="overflowAuto" style="position: relative; border: 1px solid #000; width: 700px; margin: auto; margin-top: 20px; padding: 10px 0px; overflow: visible;">
+<?php
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
+$stmt->execute([
+  ":date" => date('Y')
+]);
+$result = $stmt->fetchColumn(); // $stmt->rowCount());  UPDATE/DELETE/INSERT
+//$row = $stmt->fetch(PDO::FETCH_ASSOC); // if (!empty($row)) { }
+
+if ($result > 0) { 
+  $setting['auto_display_hamper_check'] = false; ?>
+    <div style="position: absolute; margin-left: 12px; margin-top: -18px; border: 1px dashed #000; background-color: #FFF; z-index: 1;"><div style="display: inline; background-color: hsl(0, 100%, 70%); color: #FFF;">Warning:</div> Checking `<div style="display: inline; color: red; text-decoration: underline red;">Creating Hamper</div>`, will <div style="display: inline; background-color: orange; color: #000;">Truncate</div> last year(s) hampers. <?= "($result)"; ?></div>
+<?php } ?>
+
 <!-- hamper_id  last_name  first_name  phone_number_1  address  group_size  occupants  special_diet  active_status  modified_date 	created_date -->
     <form name="client_entry" action="<?='?' . http_build_query(array_merge(APP_QUERY, []), '', '&amp;')?>" autocomplete="off" method="POST" accept-charset="utf-8">
       <input type="hidden" name="hamper_year" value="<?=date('Y')?>" />
@@ -427,6 +584,7 @@ td {
 <?php
 if (!empty($row_client['h_id']) && is_int((int) $row_client['h_id'])) {
   if ((int) $row_client['h_id'] == (int) $row_client['hamper_id']) {
+
     if ($row_client['h_year'] > date('Y')) {
       // find the latest available hamper id ?>
           <input type="checkbox" id="hamper" style="border-color: red; background-color: red; cursor: pointer;" name="hamper_id" value="<?=$row_client['h_id'];?>" <?=(!empty($row_client['h_id']) ? 'checked' : '')?> />
@@ -435,7 +593,7 @@ if (!empty($row_client['h_id']) && is_int((int) $row_client['h_id'])) {
           <a href="?hamper=<?= $row_client['hamper_id']; ?>">Hamper: [ <?= $row_client['hamper_no'];?> ]</a>
 
 <?php } else { ?>
-          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?=(empty($row_client['h_id']) ?: (!$setting['auto_display_hamper_check'] ?: 'checked'))?> />
+          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?= empty($row_client['h_id']) ?: (!$setting['auto_display_hamper_check'] ?: 'checked')?> />
           <label for="hamper" style="color: red; text-decoration: underline; cursor: pointer; font-weight: bold;">Create Hamper (<?=date('Y')?>)</label>
 <?php }
     } else if ($row_client['hamper_id'] != $row_client['h_id']) {
@@ -444,15 +602,15 @@ if (!empty($row_client['h_id']) && is_int((int) $row_client['h_id'])) {
           <input type="checkbox" id="hamper" style="border-color: red; background-color: red; cursor: pointer;" name="hamper_id" value="<?=$row_client['h_id'];?>" <?= !empty($row_client['h_id']) ? 'checked' : ''?> />
           <label for="hamper" style="cursor: pointer; color: red;">Hamper: [<?=$row_client['hamper_no'];?>] was found!</label>
 <?php } else { ?>
-          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?=(empty($row_client['h_id']) ?: (!$setting['auto_display_hamper_check'] ?: 'checked'))?> />
+          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?= empty($row_client['h_id']) ?: (!$setting['auto_display_hamper_check'] ?: 'checked') ?> />
           <label for="hamper" style="color: red; text-decoration: underline; cursor: pointer; font-weight: bold;">Create Hamper (<?=date('Y')?>)</label>
 <?php }
 } else { ?>
-          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?=(!$setting['auto_display_hamper_check'] == true ?: 'checked')?> />
+          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?= !$setting['auto_display_hamper_check'] ?: 'checked'?> />
           <label for="hamper" style="color: red; text-decoration: underline; cursor: pointer; font-weight: bold;">Create Hamper (<?=date('Y')?>)</label>
 <?php }
 } else { ?>
-          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?=(!$setting['auto_display_hamper_check'] == true ?: 'checked')?> />
+          <input type="checkbox" id="hamper" style="cursor: pointer;" name="create_hamper" value="true" <?= !$setting['auto_display_hamper_check'] ?: 'checked'?> />
           <label for="hamper" style="color: red; text-decoration: underline; cursor: pointer; font-weight: bold;">Create Hamper (<?=date('Y')?>)</label>
 <?php } ?>
            </div>

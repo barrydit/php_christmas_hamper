@@ -1,6 +1,6 @@
 <?php
 
-require_once('../config/config.php');
+require_once '../config/config.php' ;
 
 //require_once('../config/constants.php');
 
@@ -19,9 +19,9 @@ $session_msg = ob_get_contents();
 ob_end_flush();          // flush ob2 to ob1
 ob_end_clean();          // flush ob1 to browser
 
-unset($_SESSIONS[session_id()]);
+if (isset($_SESSIONS)) { unset($_SESSIONS[session_id()]); }
 
-$_SESSION['user_id'] = '';
+unset($_SESSION['user_id']); // ''
 
 // preg_match('/^[a-zA-Z0-9,-]{22,40}$/', session_id())
 
@@ -54,13 +54,13 @@ $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="Refresh" content="3; url='<?=APP_URL_BASE?>'" /> 
-    <title>Dr. David Raymant - <?=APP_NAME?> -- Logout</title>
+    <title><?=APP_NAME?> -- Logout</title>
 
     <base href="<?= !is_array(APP_URL) ? APP_URL : APP_URL_BASE ?>" />
   
-    <link rel="shortcut icon" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>favicon.ico" />
+    <link rel="shortcut icon" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>favicon.ico" />
 
-    <link rel="stylesheet" type="text/css" href="<?=(!defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH)?>assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?= !defined('APP_URL_BASE') and '//' . APP_DOMAIN . APP_URL_PATH ?>assets/css/styles.css" />
 
     <script type="text/javascript">
 <!--

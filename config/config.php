@@ -27,55 +27,25 @@ ob_start();
 !is_file(get_included_files()[0] ?? __FILE__) // (!empty(get_included_files()) ? get_included_files()[0] : __FILE__)
   or define('APP_SELF', get_included_files()[0] ?? __FILE__); // $_SERVER['PHP_SELF'] | __DIR__ . DIRECTORY_SEPARATOR
 
-$additionalPaths = [
-  __DIR__ . DIRECTORY_SEPARATOR . 'constants.php',
-  __DIR__ . DIRECTORY_SEPARATOR . 'functions.php',
-  __DIR__ . DIRECTORY_SEPARATOR . 'database.php',
-  __DIR__ . DIRECTORY_SEPARATOR . 'session.php',
-  __DIR__ . DIRECTORY_SEPARATOR . 'composer.php',
-  dirname(__DIR__, 1) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'
-]; //require('constants.php'); 
 
-
-$paths = array_merge(array_filter(glob(__DIR__ . DIRECTORY_SEPARATOR . 'classes/*.php'), 'is_file'), $additionalPaths);
-
-while ($path = array_shift($paths)) {
-  if ($path = realpath($path))
-    require_once $path;
-  else die(var_dump(basename($path) . ' was not found. file=classes/' . basename($path)));
-}
 
 // Check if the directory structure is /public_html/
-if (strpos(APP_SELF, '/public_html/') !== false) { // basename(__DIR__) == 'public_html'
-  
-  $errors['APP_PUBLIC'] = "The `public_html` scenario was detected.\n";
-  
-  if (is_dir(dirname(APP_SELF, 2) . '/config')) {
-    $errors['APP_PUBLIC'] .= "\t" . dirname(APP_SELF, 2) . '/config/*' . ' was found. This is not safe.'; 
-  }
+
 
     // It is under the public_html scenario
     // Perform actions or logic specific to the public_html directory
     // For example:
     // include '/home/user_123/public_html/config.php';
-} elseif (strpos(APP_SELF, '/public/') !== false) {
+if (strpos(APP_SELF, '/public/') !== false || strpos(APP_SELF, '/public_html/') !== false || strpos(APP_SELF, '/www/') !== false || strpos(APP_SELF, '/htdocs/') !== false || strpos(APP_SELF, '/html/') !== false || strpos(APP_SELF, '/web/') !== false) {  
+  $errors['APP_PUBLIC'] = "The `" . basename(dirname(APP_SELF)) . "` scenario was detected.\n";
+  
+  if (is_dir(dirname(APP_SELF, 1) . '/config')) {
+    $errors['APP_PUBLIC'] .= "\t" . dirname(APP_SELF, 1) . '/config/*' . ' was found. This is not safe.'; 
+  }
+
   if (basename(get_required_files()[0]) !== 'release-notes.php')
     if (is_dir('../config')) {
-/*
-      foreach(glob(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . '*.php') as $includeFile) {
-      
-        if ($includeFile == realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'composer.php'))
-          if (!defined('APP_ENV') || APP_ENV != 'development') continue;
-
-      
-        if (in_array($includeFile, get_required_files())) continue; // $includeFile == __FILE__
-        if (!file_exists($includeFile)) {
-          error_log("Failed to load a necessary file: " . $includeFile . PHP_EOL); //exit(1);
-          break;
-        }
-        require $includeFile;
-      }
-*/
+/* */
     } elseif (is_file('config.php')) require_once 'config.php';
 }
 

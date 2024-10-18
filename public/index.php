@@ -3,15 +3,13 @@
 defined('APP_PATH') // $_SERVER['DOCUMENT_ROOT']
   or define('APP_PATH', dirname(__DIR__, 1) . DIRECTORY_SEPARATOR);
 
-require APP_PATH . 'index.php';
-
-require_once APP_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'; // composer dump -o
+require APP_PATH . 'index.php'; // require_once APP_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php'; // composer dump -o
 
 //die(var_dump(get_required_files()));
 
 switch($_SERVER['SERVER_NAME']) {
   case stristr($_SERVER['SERVER_NAME'], isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']):
-    if (!isset($_SERVER['HTTPS']) && @$_SESSION['enable_ssl'] == TRUE):
+    if (!isset($_SERVER['HTTPS']) && $_SESSION['enable_ssl'] == TRUE):
       //exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE ))); // basename($_SERVER['REQUEST_URI']));
     endif;
     if ($_SERVER['SERVER_NAME'] == 'localhost') {
@@ -21,7 +19,7 @@ switch($_SERVER['SERVER_NAME']) {
     break;
 
   default:
-    if (!isset($_SERVER['HTTPS']) && @$_SESSION['enable_ssl'] == TRUE):
+    if (!isset($_SERVER['HTTPS']) && $_SESSION['enable_ssl'] == TRUE):
       exit(header('Location: ' . preg_replace("/^http:/i", "https:", APP_URL_BASE . $_SERVER['QUERY_STRING'])));
     endif;
     break;
@@ -33,125 +31,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 */
   default:
-    if ($_SERVER['REQUEST_METHOD'] == 'GET') { // leave condition; 
-      header('Content-Type: text/html; charset=utf-8');
-
-      $setting['del_prev_annual_hamper'] = true;
-      
-      if ($setting['del_prev_annual_hamper']) {
-      
-      /*
-        Look for 1 hamper, where the YEAR(`createed_date`) is less than date('Y') aka CURR_YEAR
-
-          If found, look for 1 hamper, where the YEAR(`created_date`) is equal to this date('Y') aka CURR_YEAR
-
-          [Cancels/Requires] in having multiple years (current year, and < date('Y')) at the same time, before they are deleted.
-      */
-      
-        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date LIMIT 1;');
-        $stmt->execute([
-          ":date" => date('Y')
-        ]);
-        
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!empty($row)) {
-          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
-          $stmt->execute([
-            ":date" => date('Y')
-          ]);
-        
-          $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-          if (!empty($row)) {
-            $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-            $stmt->execute([
-              ":date" => date('Y')
-            ]);
-          }
-        }
-        
-        /*
-          Look for 1 Hamper WHERE YEAR(created_date) = CURR_YEAR
-          
-        */
-
-        $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date LIMIT 1;');
-        $stmt->execute([
-          ":date" => date('Y')
-        ]);
-        
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!empty($row)) {
-      
-          $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC LIMIT 1;');
-          $stmt->execute([
-            ":date" => date('Y')
-          ]);
-        
-          $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-          if (!empty($row)) {
-            $stmt = $pdo->prepare('SELECT `id`, `client_id` FROM `hampers` WHERE YEAR(`created_date`) < :date ORDER BY `id` DESC;');
-            $stmt->execute([
-              ":date" => date('Y')
-            ]);
-        
-            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // $row = array_shift($rows)
-              $stmt = $pdo->prepare('UPDATE `clients` SET `hamper_id` = NULL WHERE `id` = :client_id AND `hamper_id` = :hamper_id ;');
-              $stmt->execute([
-                ":client_id" => $row['client_id'],
-                ":hamper_id" => $row['id']
-              ]);
-            }
-          
-            $stmt = $pdo->prepare('SELECT `id`, `client_id`, YEAR(`created_date`) FROM `hampers` WHERE YEAR(`created_date`) >= :date ORDER BY `id` DESC LIMIT 1;');
-            $stmt->execute([
-              ":date" => date('Y')
-            ]);
-          
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-          
-            if (!empty($row)) {
-              $stmt = $pdo->prepare('DELETE FROM `hampers` WHERE YEAR(`created_date`) < :date ;');
-              $stmt->execute([
-                ":date" => date('Y')
-              ]);
-            } else {
-              $stmt = $pdo->prepare('SELECT `id` FROM `hampers` WHERE YEAR(`created_date`) = :date ORDER BY `id` DESC LIMIT 1;');
-              $stmt->execute([
-                ":date" => date('Y')
-              ]);
-        
-              $row = $stmt->fetch(PDO::FETCH_ASSOC);
-              
-              if (!empty($row)) {
-                exec('mysqldump'
-                . ' --user=' . DB_UNAME
-                . (empty(DB_PWORD) ? '' : ' --password=' . DB_PWORD)
-                . ' --host=' . DB_HOST
-                . ' --default-character-set=utf8'
-                . ' --single-transaction'
-                //. ' --routines'
-                . ' --add-drop-database'
-                . ' --add-drop-table'
-                . ' --databases ' . DB_NAME[0]
-                . ' --result-file="' . DB_BACK_PATH . DB_BACK_FILE . '"'
-                . ' 2>&1', $output, $worked);
-
-                if (!empty($output)) die(var_dump($output));
-              } else {
-                $stmt = $pdo->prepare('TRUNCATE TABLE `hampers`;');
-                $stmt->execute([]);
-              }
-            
-              // check if there are any rows for curr_year ... backup, otherwise truncate
-            }
-          }
-        }
+/*    if ($_SERVER['REQUEST_METHOD'] == 'GET') { // leave condition; 
+      if (!headers_sent()) {
+        header('Content-Type: text/html; charset=utf-8');
       }
-    }
+    } */
     $stmt = $pdo->prepare(<<<HERE
 SELECT id, last_name, first_name, phone_number_1, COUNT(last_name) as count
 FROM clients
@@ -216,7 +100,9 @@ HERE
             require APP_PATH . APP_BASE['src'] . 'search_hamper.php';
             break;
           default:
-            exit(header('Location: ' . APP_URL_BASE));
+            if (!headers_sent())
+              exit(header('Location: ' . APP_URL_BASE));
+            require APP_PATH . APP_BASE['src'] . 'index.php';
         }
         break;
       case 'client':

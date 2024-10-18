@@ -1,10 +1,13 @@
 <?php
 
-function dd($param) {
-  echo '<pre><code>';
-  var_dump($param); // var_export($param)
-  print '</code></pre>'; // get_defined_constants(true)['user']'
-  return die();
+if (is_dir($path = APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR)) {
+  $paths = array_filter(glob("$path*.php"), 'is_file');
+
+  while ($path = array_shift($paths)) {
+    if ($path = realpath($path))
+      require_once $path;
+    else die(var_dump(basename($path) . ' was not found. file=classes/' . basename($path)));
+  }
 }
 
 /**

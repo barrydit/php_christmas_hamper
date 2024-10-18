@@ -1,5 +1,10 @@
 <?php
 
+defined('APP_PATH') // $_SERVER['DOCUMENT_ROOT']
+  or define('APP_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
+//die('test');
+//
+
 // Check if the config file exists in various locations based on the current working directory
 $path = null;
 $publicDir = basename(getcwd()) == 'public';
@@ -13,6 +18,10 @@ if ($publicDir) {
         $path = realpath('config.php');
     }
 } else {
+  
+chdir(APP_PATH . 'public');
+
+    exit(header('Location: '));
     // We are not in the public directory
     if (is_file('config/config.php')) {
         $path = realpath('config/config.php');
@@ -28,62 +37,51 @@ if ($path) {
     die(var_dump("Config file was not found."));
 }
 
-$previousFilename = '';
+if (is_dir(APP_PATH . 'config')) {
+  $dirs = [];
 
-$dirs = [APP_PATH . APP_BASE['config'] . 'php.php']; /* */
+  foreach(glob(APP_PATH . 'config' . DIRECTORY_SEPARATOR . '*.php') as $includeFile) {
+    //if ($includeFile == realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'))
+    //  continue;      
+    if ($includeFile == realpath(APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'debug.php'))
+      continue;
+    elseif ($includeFile == realpath(APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'install.php'))
+      continue;
+    elseif (in_array($includeFile, get_required_files())) continue; // $includeFile == __FILE__
+    elseif (!file_exists($includeFile)) {
+      error_log("Failed to load a necessary file: " . $includeFile . PHP_EOL); //exit(1);
+      break;
+    }
+    else $dirs = array_merge($dirs, [$includeFile]); // require $includeFile;
+  }
 
-!isset($_GET['app']) || $_GET['app'] != 'git' ?:
-  (APP_SELF != APP_PATH_PUBLIC ?: $dirs[] = APP_PATH . APP_BASE['config'] . 'git.php');
-
-!isset($_GET['app']) || $_GET['app'] != 'composer' ?:
-  $dirs = (APP_SELF != APP_PATH_PUBLIC) 
-    ? array_merge(
-      $dirs,
-      [
-        (!is_file($include = APP_PATH . APP_BASE['config'] . 'composer.php') ?: $include)
-      ]
-      )
-    : array_merge(
-      $dirs,
-      [
-        (!is_file($include = APP_PATH . APP_BASE['config'] . 'composer.php') ?: $include),
-        (!is_file($include = APP_PATH . APP_ROOT . APP_BASE['vendor'] . 'autoload.php') ?: $include)
-      ]
-    );
-
-//if (is_file($path = APP_PATH . APP_BASE['config'] . 'composer.php')) require_once $path; 
-//else die(var_dump("$path path was not found. file=" . basename($path)));
-
-!isset($_GET['app']) || $_GET['app'] != 'npm' ?:
-  (APP_SELF != APP_PATH_PUBLIC ?: 
-    (!is_file($include = APP_PATH . APP_BASE['config'] . 'npm.php') ?: $dirs[] = $include ));
-
-unset($include);
+  $dirs = array_merge($dirs, [APP_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php']); //require('constants.php');
 
 usort($dirs, function ($a, $b) {
-  if (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . APP_BASE['config'] . 'php.php')
+  if (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'constants.php')
     return -1; // $a comes after $b
-  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . APP_BASE['config'] . 'php.php')
+  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'constants.php')
     return 1; // $a comes before $b
-  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . APP_BASE['config'] . 'composer.php') // DIRECTORY_SEPARATOR
+  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'functions.php') // DIRECTORY_SEPARATOR
     return -1; // $a comes after $b
-  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . APP_BASE['config'] . 'composer.php')
+  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'functions.php')
     return 1; // $a comes before $b
-  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . APP_ROOT . APP_BASE['vendor'] . 'autoload.php') // DIRECTORY_SEPARATOR
+  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'database.php') // DIRECTORY_SEPARATOR
     return -1; // $a comes after $b
-  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . APP_ROOT . APP_BASE['vendor'] . 'autoload.php')
+  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'database.php')
     return 1; // $a comes before $b
-  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . APP_BASE['config'] . 'git.php')
+  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'session.php')
     return -1; // $a comes after $b
-  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . APP_BASE['config'] . 'git.php')
+  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'session.php')
     return 1; // $a comes before $b
-  //elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . APP_BASE['config'] . 'npm.php')
-  //  return -1; // $a comes after $b
-  //elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . APP_BASE['config'] . 'npm.php')
-  //  return 1; // $a comes before $b
+  elseif (dirname($a) . DIRECTORY_SEPARATOR . basename($a) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'composer.php')
+    return -1; // $a comes after $b
+  elseif (dirname($b) . DIRECTORY_SEPARATOR . basename($b) === APP_PATH . 'config' . DIRECTORY_SEPARATOR . 'composer.php')
+    return 1; // $a comes before $b
   else 
     return strcmp(basename($a), basename($b)); // Compare other filenames alphabetically
 });
+
 
 foreach ($dirs as $includeFile) {
   $path = dirname($includeFile);
@@ -91,6 +89,31 @@ foreach ($dirs as $includeFile) {
   if (in_array($includeFile, get_required_files())) continue; // $includeFile == __FILE__
 
   if (basename($includeFile) === 'composer-setup.php') continue;
+
+  if (basename($includeFile) === 'session.php') {
+
+    require_once $includeFile;
+
+    if (isset($_GET['logout']))
+      require_once APP_PATH . APP_BASE['public'] . 'logout.php';
+      //dd($_SESSION, false);
+    if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) {
+      if (isset($_GET['login'])) {
+        exit(header('Location: ' . APP_URL_BASE));
+        //break;
+      }
+      if (isset($_GET['debug'])) {
+        require_once APP_PATH . APP_BASE['config'] . 'debug.php';
+        exit();
+        //break;
+      }
+      continue;
+    } else {
+      require_once APP_PATH . APP_BASE['public'] . 'login.php'; // break;
+    }
+
+    die(); // break; // continue;
+  }
 
   if (!file_exists($includeFile)) {
     error_log("Failed to load a necessary file: " . $includeFile . PHP_EOL);
@@ -104,20 +127,24 @@ foreach ($dirs as $includeFile) {
 
     // dd('file:'.$currentFilename,false);
     //dd("Trying file: $includeFile", false);
-
-    switch ($includeFile) {
-      case APP_PATH . APP_ROOT . APP_BASE['vendor'] . 'autoload.php':
-        (!isset($_ENV['COMPOSER']['AUTOLOAD']) || (bool) $_ENV['COMPOSER']['AUTOLOAD'] !== true || APP_SELF !== APP_PATH_SERVER) ?: require_once $includeFile;
-        break;
-      default:
-
-        require_once $includeFile;
-        break;
-    }
+    require_once $includeFile;
 
     $previousFilename = $currentFilename;     
   }
 }
+
+}
+
+//dd($_SESSION, false);
+//dd(get_required_files(), false);
+
+//dd($_SESSION, false);
+
+//dd(null, true);
+
+//die(var_dump(get_required_files()));
+
+if (!extension_loaded('session')) {
 
 // Check if the user has requested logout
 if (filter_input(INPUT_GET, 'logout')) { // ?logout=true
@@ -134,9 +161,9 @@ if (filter_input(INPUT_GET, 'logout')) { // ?logout=true
   unset($_SERVER['HTTP_AUTHORIZATION'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
     
   // Optional: Clear any existing headers related to authorization
-  if (function_exists('header_remove')) {
-    header_remove('HTTP_AUTHORIZATION');
-  }
+  function_exists('header_remove')
+    and header_remove('HTTP_AUTHORIZATION') . header_remove('PHP_AUTH_USER') . header_remove('PHP_AUTH_PW');
+
 
   // Provide feedback to the user and exit the script
   //header('Location: http://test:123@localhost/');
@@ -173,6 +200,7 @@ if (PHP_SAPI !== 'cli') {
     //echo "<p>You entered '{$_SERVER['PHP_AUTH_PW']}' as your password.</p>";
     //echo "<p>Authorization header: {$_SERVER['HTTP_AUTHORIZATION']}</p>";
   }
+}
 }
 /*
 if (isset($_GET['debug'])) 

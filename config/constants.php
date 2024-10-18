@@ -2,6 +2,8 @@
 
 const DOMAIN_EXP = '/^(?:[a-z]+\:\/\/)?(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:\/\S*)?$/'; // /(?:\.(?:([-a-z0-9]+){1,}?)?)?\.[a-z]{2,6}$/
 
+require_once 'functions.php';
+
 // Enable output buffering
 //ini_set('output_buffering', 'On');
 
@@ -71,20 +73,22 @@ and define('APP_LOGIN', $login);
 (defined('APP_LOGIN') && is_array(APP_LOGIN)) and (empty(APP_LOGIN['UNAME']) || empty(APP_LOGIN['PWORD']) ?: $errors['APP_LOGIN'] = APP_LOGIN); //print('Auth: ' . "\n\t" . '(User => ' . APP_LOGIN['UNAME'] . ' Password => ' . APP_LOGIN['PWORD'] . ")\n");
 
 // absolute pathname 
-if (basename(__DIR__) == 'config') {
-  //chdir('../');
-  define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
-    'config' => 'config' . DIRECTORY_SEPARATOR,
-    'database' => 'database' . DIRECTORY_SEPARATOR,
-    'public' => 'public' . DIRECTORY_SEPARATOR,
-    'src' => 'src' . DIRECTORY_SEPARATOR,
-    'tmp' => 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
-    'export' =>  'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
-    'session' => 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR,
-  ]);
-} else {
-  define('APP_PATH', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR);
-  define('APP_BASE', []);
+switch (__DIR__) {
+  case APP_PATH . 'config':
+    define('APP_BASE', [ // https://stackoverflow.com/questions/8037266/get-the-url-of-a-file-included-by-php
+      'config' => 'config' . DIRECTORY_SEPARATOR,
+      'database' => 'database' . DIRECTORY_SEPARATOR,
+      'public' => 'public' . DIRECTORY_SEPARATOR,
+      'src' => 'src' . DIRECTORY_SEPARATOR,
+      'tmp' => 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
+      'export' => 'var' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
+      'session' => 'var' . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR,
+    ]);
+    break;
+  default:
+    define('APP_PATH', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR);
+    define('APP_BASE', []);
+    break;
 }
 
 if (defined('APP_DOMAIN') && !in_array(APP_DOMAIN, ['localhost', '127.0.0.1', '::1'])) {
@@ -112,6 +116,7 @@ if (defined('APP_BASE'))
     $errors['APP_BASE'] = json_encode(array_keys(APP_BASE)); // print('App Base: ' .  . "\n");
   else {
     foreach (APP_BASE as $key => $path) { // << -- This only works when debug=true
+      if ($path == 'var/session/') continue;
       if (!is_dir(APP_PATH . $path) && APP_DEBUG)
         (@!mkdir(APP_PATH . $path, 0755, true) ?: $errors['APP_BASE'][$key] = $path . ' could not be created.' );
     //else $errors['APP_BASE'][$key] = $path;

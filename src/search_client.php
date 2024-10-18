@@ -483,6 +483,7 @@ td {
     <div style="padding: 0px 20px 0px 20px;">
       <h3><a href="./" style="text-decoration: none;"><img src="data:image/gif;base64,R0lGODlhDgAMAMQAAAAAANfX11VVVbKyshwcHP///4SEhEtLSxkZGePj42ZmZmBgYL6+vujo6CEhIXFxcdnZ2VtbW1BQUObm5iIiIoiIiO3t7d3d3Wtrax4eHiQkJAAAAAAAAAAAAAAAAAAAACH5BAAHAP8ALAAAAAAOAAwAAAVLYCGOwzCeZ+I4CZoiAIC07kTEMTGhTYbjmcbI4vj9KJYCQ/MTCH4ahuEQiVVElZjkYBA9YhfRJaY4YWIBUSC2MKPVbDcgXVgD2oUQADs=" alt="Home Page" /> Home</a> | <a href="?reports">Reports</a> | <a href="?search">Search</a> &#11106; Clients : <a href="?search=hampers">Hampers</a>
         <form action="<?='?'?>" method="GET" autocomplete="off" style="display: inline; float: right;">
+          <button type="submit" name="logout" value="" style="float: right; width: 7em; margin-left: 3px;">Logout</button>&nbsp;
           <button type="submit" name="client" value="entry" style="float: right; width: 7em;">New Client</button>
         </form>
       </h3>
